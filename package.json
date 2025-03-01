@@ -8,7 +8,9 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "googleapis": "^146.0.0",
-    "node": "^18.20.7"
+    "moongose": "^1.0.0",
+    "node": "^18.20.7",
+    "sessions": "^0.0.2-7"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
