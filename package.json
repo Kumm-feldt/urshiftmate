@@ -4,7 +4,10 @@
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/react": "^6.1.15",
     "@tailwindcss/postcss": "^4.0.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "googleapis": "^146.0.0",
     "node": "^18.20.7"
   },
   "devDependencies": {
