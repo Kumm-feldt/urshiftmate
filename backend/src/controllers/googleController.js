@@ -20,7 +20,9 @@ async function filterEvents(req, res, next, eventList){
   let jobs = await Workplace.find({googleId});
 
   if(jobs.length > 0 ){
+
     eventList.forEach((event)=>{
+
       if(event.summary && event.summary.toLowerCase().includes("shift")){
        jobs.forEach((job)=>{
 
@@ -44,6 +46,11 @@ async function filterEvents(req, res, next, eventList){
   
       }
     })
+  }
+  if (filteredData.length > 0){
+    res.send(filteredData);
+  }else{
+    res.status(404).send("No data Available");
   }
 
 }
