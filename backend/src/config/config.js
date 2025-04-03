@@ -25,9 +25,15 @@ module.exports = {
 
     logLevel,
 
-    httpPort: 5000,
+    httpPort: 8000,
 
     staticDir: projectPath('static'),
+    sessionSecret: 'bunnyslippers',
+    dbInfo: {
+        host: 'localhost', 
+        db: 'test-urshiftmate'
+    
+    }
 
    
 };
