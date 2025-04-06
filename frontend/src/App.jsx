@@ -8,13 +8,25 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const App = () => {
   const [auth, setAuth] = useState({ isAuthenticated: false, user: null });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`${API_URL}/auth/status`, { credentials: "include" }) // Fetch session status
       .then((res) => res.json())
-      .then((data) => setAuth(data))
-      .catch((error) => console.error("Error fetching auth status:", error));
+      .then((data) => {
+          setAuth(data)
+          setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching auth status:", error)
+        setLoading(false)
+      });
   }, []);
+
+
+  if (loading) return <div>Loading...</div>; // Or a spinner
+
+
 
   return (
     <Router>

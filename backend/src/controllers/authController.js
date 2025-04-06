@@ -10,6 +10,7 @@ const oauth2Client = new google.auth.OAuth2(
 
 // Redirect users to Google OAuth2 consent screen
 exports.googleOAuth2ConsentScreen = (req, res) => {
+  
   const url = oauth2Client.generateAuthUrl({
     access_type: "offline",
     scope: [
@@ -47,7 +48,6 @@ exports.oAuth2CallbackHandler = async (req, res) => {
     // Set user session
     req.session.googleId = googleId;
     req.session.isAuthenticated = true;
-  //  res.cookie("user", googleId, { httpOnly: true, maxAge: 86400000 }); // Store session in a cookie
 
   res.redirect("http://localhost:3000/dashboard");
 

@@ -7,7 +7,7 @@ router.get("/google", googleOAuth2ConsentScreen);
 router.get("/google/callback", oAuth2CallbackHandler);
 router.post("/logout", logout);
 
-// ✅ New: Check authentication status
+
 router.get("/status", (req, res) => {
     if (req.session.isAuthenticated) {
         res.json({ isAuthenticated: true, user: req.session.userId });

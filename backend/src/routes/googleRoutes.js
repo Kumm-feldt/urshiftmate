@@ -1,9 +1,11 @@
 const express = require("express");
-const { getEvents } = require("../controllers/googleController");
+const googleController = require("../controllers/googleController");
 const { isAuthenticated } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.get("/events", isAuthenticated, getEvents);
+router.get("/detailedEvents", isAuthenticated, googleController.getDetailEvents);
+router.get("/summaryEvents", isAuthenticated, googleController.getSummaryEvents);
+
 
 module.exports = router;

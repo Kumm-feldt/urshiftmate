@@ -1,34 +1,54 @@
 import React, { useEffect, useState } from "react";
 import Table from  "./Table"
+import "./Dashboard.css"
 
 const Dashboard = () => {
-  const [events, setEvents] = useState([]);
+  const [detEvents, setDetailedEvents] = useState([]);
+  const [summEvents, setSummarizedEvents] = useState([]);
+
  // const [earnings, setEarnings] = useState(0);
   const [workplaces, setWorkplaces] = useState([]);
   const [newWorkplace, setNewWorkplace] = useState("");
   const [hourlyRate, setHourlyRate] = useState("");
 
   useEffect(() => {
-    fetchEvents();
-    //fetchEarnings();
+    fetchDetailedEvents();
+    fetchSummarizedEvents();
     //fetchWorkplaces();
   }, []);
 
   // Fetch events from backend
-  const fetchEvents = async () => {
+  const fetchDetailedEvents = async () => {
     try {
-      const response = await fetch("http://localhost:8000/google/events", {
+      const response = await fetch("http://localhost:8000/google/detailedEvents", {
         credentials: "include",
       });
       const data = await response.json();
-      setEvents(data);
+      setDetailedEvents(data);
     } catch (error) {
       console.error("Error fetching events:", error);
     }
   };
 
 
+ const fetchSummarizedEvents = async () => {
+  try {
+    const response = await fetch("http://localhost:8000/google/summaryEvents", {
+      credentials: "include",
+    });
+    const data = await response.json();
+    setSummarizedEvents(data);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+  }
+};
+
+  
+
+
 const header = ["Job", "Wage", "Hours Worked", "Total"];
+const headerDetailed = ["Job", "Wage", "Start Time","End Time",  "Hours Worked"];
+
 
   return (
     <div>
@@ -65,12 +85,11 @@ const header = ["Job", "Wage", "Hours Worked", "Total"];
 */}
       {/* Google Calendar Events */}
       <h3>Upcoming Events</h3>
-      <ul>
-        {events.map((event, index) => (
-          <li key={index}>{event.summary} - {new Date(event.start.dateTime).toLocaleString()}</li>
-        ))}
-      </ul>
+      <div className="dashboard-div-container">
+      <Table columns={header} data={summEvents} renderType={"Summary"}></Table>
+      <Table columns={headerDetailed} data={detEvents} renderType={"Detailed"}></Table>
 
+      </div>
       <button onClick={() => {
         fetch("http://localhost:8000/auth/logout", { method: "POST", credentials: "include" });
         window.location.href = "/login";

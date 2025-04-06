@@ -6,15 +6,31 @@ require('dotenv').config();
 
 const authRoutes = require("./routes/authRoutes");
 const googleRoutes = require("./routes/googleRoutes");
+const userConfigRoutes = require("./routes/crudRoutes.js")
 
 const config = require("./config/config")
 
 const app = express();
 
-app.use(express.json());
-app.use(session({ secret: config.sessionSecret, resave: false, saveUninitialized: false }));
+const expressSession = require('express-session');
+const sessionFileStore = require('session-file-store');
+const FileStore = sessionFileStore(expressSession)
 
-// ✅ Configure CORS to allow requests from frontend (React)
+
+
+app.use(express.json());
+app.use(session({
+  secret: config.sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, 
+    httpOnly: true,
+    sameSite: "lax",
+  },
+}));
+
+// Configure CORS to allow requests from frontend (React)
 app.use(cors({
   origin: "http://localhost:3000",  // Allow frontend origin
   credentials: true,  // Allow cookies/session sharing
@@ -23,5 +39,6 @@ app.use(cors({
 
 app.use("/auth", authRoutes);
 app.use("/google", googleRoutes);
+app.use("/user/config", userConfigRoutes);
 
 module.exports = app;

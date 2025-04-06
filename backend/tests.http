@@ -1,0 +1,16 @@
+@url = http://localhost:8000
+
+
+
+###
+POST {{url}}/user/config/workplace
+Content-Type: application/json
+
+{
+    "userId" : 103287971580046408707,
+    "workplace": "Desk",
+    "hourlyRate": 11
+}
+
+###
+GET {{url}}/google/summaryEvents
