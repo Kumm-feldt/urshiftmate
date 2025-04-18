@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Table from  "./Table"
 import "./Dashboard.css"
+import "./Sidebar"
+import Sidebar from "./Sidebar";
+import Summary from "./Summary"
 
 const Dashboard = () => {
   const [detEvents, setDetailedEvents] = useState([]);
@@ -48,45 +51,24 @@ const Dashboard = () => {
 
 const header = ["Job", "Wage", "Hours Worked", "Total"];
 const headerDetailed = ["Job", "Wage", "Start Time","End Time",  "Hours Worked"];
+const clientName = "Anthony";
+const quote = "Great Week! ";
 
 
   return (
     <div>
-      <h1>Dashboard</h1>
-
-      {/* Earnings Display 
-      <h2>Total Earnings: ${earnings}</h2>
-      */}
-
-      {/* Workplace List */}
-      <h3>Your Workplaces</h3>
-      {/*
-      <ul>
-        {workplaces.map((workplace, index) => (
-          <li key={index}>{workplace.workplace} - ${workplace.hourlyRate}/hr</li>
-        ))}
-      </ul>*/}
-
-      {/* Add New Workplace 
-      <h3>Add Workplace</h3>
-      <input
-        type="text"
-        placeholder="Workplace Name"
-        value={newWorkplace}
-        onChange={(e) => setNewWorkplace(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Hourly Rate"
-        value={hourlyRate}
-        onChange={(e) => setHourlyRate(e.target.value)}
-      />
-      <button onClick={handleAddWorkplace}>Add Workplace</button>
-*/}
+      <Sidebar></Sidebar>
       {/* Google Calendar Events */}
-      <h3>Upcoming Events</h3>
+
       <div className="dashboard-div-container">
+      <h1>Hello {clientName}, {quote}! 👋</h1>
+
+     <Summary date={"March 17"} moneyAmount={"321.21"}></Summary>
+
+      <div className="table-holder">
+        <h2 className="h2-title-table">Hours from Feb 12 to March 1</h2>
       <Table columns={header} data={summEvents} renderType={"Summary"}></Table>
+      </div>
       <Table columns={headerDetailed} data={detEvents} renderType={"Detailed"}></Table>
 
       </div>

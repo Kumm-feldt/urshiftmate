@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
     googleId: String,
     name: String,
     email: String,
+    token: String,
     refreshToken: String,
     calendars: {
         type: [String],

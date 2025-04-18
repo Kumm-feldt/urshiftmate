@@ -23,6 +23,7 @@ app.use(session({
   secret: config.sessionSecret,
   resave: false,
   saveUninitialized: false,
+  store: new FileStore(),
   cookie: {
     secure: false, 
     httpOnly: true,

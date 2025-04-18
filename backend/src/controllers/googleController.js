@@ -3,7 +3,7 @@ const { getRefreshToken } = require("./userController");
 const { builtinModules } = require("module");
 const {Workplace} = require("../models/Workplace");
 const {User} = require("../models/User");
-
+const dateFile = require("./dates.json");
 
 
 require('dotenv').config();
@@ -13,6 +13,63 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URL
 );
+
+
+
+
+function getDates() {
+  const currentDate = new Date(); // parse the input string as Date
+
+  for (const dateItem of dateFile) {
+    const from = new Date(dateItem.weekOneStart);
+    const to = new Date(dateItem.weekTwoEnd);
+
+    if (currentDate >= from && currentDate <= to) {
+      return {
+        weekOneStart: dateItem.weekOneStart,
+        weekOneEnd: dateItem.weekOneEnd,
+        weekTwoStart: dateItem.weekTwoStart,
+        weekTwoEnd: dateItem.weekTwoEnd,
+        checkDay: dateItem.checkDate,
+      };
+    }
+  }
+
+  return null; // If no match found
+}
+
+
+async function getEvents(req, res, googleId, dates)
+{
+
+  try{
+    const refreshToken = await getRefreshToken(googleId);
+    
+    if (!refreshToken) {
+        return res.status(401).json({ error: "No refresh token found. Please re-authenticate." });
+      }
+  
+      oauth2Client.setCredentials({ refresh_token: refreshToken });
+      const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+  
+      const response = await calendar.events.list({
+        calendarId: "primary",
+        timeMin: dates.weekOneStart,
+        timeMax: dates.weekTwoEnd,
+        singleEvents: true,
+        orderBy: "startTime",
+      });
+
+      return response.data.items;
+
+
+} catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ error: error.message });
+}
+
+
+}
 
 async function filterEvents(req, res, next, eventList){
   const googleId = req.session.googleId;
@@ -90,26 +147,16 @@ async function summaryEvents(req, res, next, filteredEvents){
 async function getDetailEvents(req, res, next){
     try{
         const googleId = req.session.googleId;
-        const refreshToken = await getRefreshToken(googleId);
-        
-        if (!refreshToken) {
-            return res.status(401).json({ error: "No refresh token found. Please re-authenticate." });
-          }
-      
-          oauth2Client.setCredentials({ refresh_token: refreshToken });
-          const calendar = google.calendar({ version: "v3", auth: oauth2Client });
-      
-          const response = await calendar.events.list({
-            calendarId: "primary",
-            timeMin: new Date().toISOString(),
-            maxResults: 3,
-         
-            singleEvents: true,
-            orderBy: "startTime",
-          });
 
-          let filteredData = await filterEvents(req, res, next, response.data.items);
-          res.json(filteredData);
+        const dateObject = getDates();
+        const events = await getEvents(req, res, googleId, dateObject);
+        console.log("----------------->", events);
+
+
+        let filteredData = await filterEvents(req, res, next, events);
+        res.locals.filteredData = filteredData;
+        res.json(filteredData);
+        next();
     } catch (error) {
         console.error("Error fetching events:", error);
         res.status(500).json({ error: error.message });
@@ -118,33 +165,14 @@ async function getDetailEvents(req, res, next){
     
 }
 
-async function getSummaryEvents(req, res, next){
+async function getSummaryEvents(req, res, filteredEvents){
   try{
-      const googleId = req.session.googleId;
-      const refreshToken = await getRefreshToken(googleId);
       
-      if (!refreshToken) {
-          return res.status(401).json({ error: "No refresh token found. Please re-authenticate." });
-        }
-    
-        oauth2Client.setCredentials({ refresh_token: refreshToken });
-        const calendar = google.calendar({ version: "v3", auth: oauth2Client });
-    
-        const response = await calendar.events.list({
-          calendarId: "c_191245c87c8794fc0500b30cd9c71fab062242eb1d3b39606c4faf9cebd20f73@group.calendar.google.com",
-          timeMin: new Date().toISOString(),
-          maxResults: 3,
-          singleEvents: true,
-          orderBy: "startTime",
-        });
-
-        let filteredData = await filterEvents(req, res, next, response.data.items);
-        let summary = await summaryEvents(req, res, next, filteredData);
+        let summary = await summaryEvents(req, res, next, res.locals.filteredData);
         res.json(summary);
-        console.log("Summary: ->>>>>>>>>" , summary)
+        console.log("Summary: " , summary)
         console.log("filteredData: ->>>>>>>>>" , filteredData)
         
-
 
 
   } catch (error) {

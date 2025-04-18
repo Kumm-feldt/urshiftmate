@@ -9,7 +9,7 @@ Content-Type: application/json
 {
     "userId" : 103287971580046408707,
     "workplace": "Desk",
-    "hourlyRate": 11
+    "hourlyRate": 9
 }
 
 ###

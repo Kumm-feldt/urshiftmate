@@ -1,16 +1,21 @@
 const { User } = require("../models/User");
 const { google } = require("googleapis");
 require('dotenv').config();
+const crypto = require('crypto');
+
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URL 
 );
-
+function generateState() {
+  return crypto.randomBytes(16).toString('hex');
+}
 // Redirect users to Google OAuth2 consent screen
 exports.googleOAuth2ConsentScreen = (req, res) => {
-  
+  const state = generateState();
+
   const url = oauth2Client.generateAuthUrl({
     access_type: "offline",
     scope: [
@@ -18,7 +23,8 @@ exports.googleOAuth2ConsentScreen = (req, res) => {
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/calendar.readonly",
     ],
-    prompt: "consent",
+    prompt: "none",
+    include_granted_scopes: true,
     redirect_uri: process.env.GOOGLE_REDIRECT_URL // Make sure this matches your registered redirect URI
 
   });
@@ -27,8 +33,27 @@ exports.googleOAuth2ConsentScreen = (req, res) => {
 
 // Handle OAuth2 callback
 exports.oAuth2CallbackHandler = async (req, res) => {
+  const { code, error, state } = req.query;
+  const authMode =  'silent';
+  
+  
+  // If error with silent auth, try with consent
+  if (error && authMode === 'silent') {
+    const authUrl = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/calendar.readonly",
+      ],
+      prompt: 'select_account', 
+      include_granted_scopes: true,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URL
+    });
+    return res.redirect(authUrl);
+  }
+
   try {
-    const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
@@ -38,7 +63,7 @@ exports.oAuth2CallbackHandler = async (req, res) => {
 
     let user = await User.findOne({ googleId });
     if (!user) {
-      user = new User({ googleId, name, email, refreshToken: tokens.refresh_token });
+      user = new User({ googleId, name, email, token: tokens.access_token, refreshToken: tokens.refresh_token });
       await user.save();
     } else if (tokens.refresh_token && user.refreshToken !== tokens.refresh_token) {
       user.refreshToken = tokens.refresh_token;

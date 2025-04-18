@@ -1,0 +1,185 @@
+[
+    {
+      "weekOneStart": "2024-06-23",
+      "weekOneEnd": "2024-06-29",
+      "weekTwoStart": "2024-06-30",
+      "weekTwoEnd": "2024-07-06",
+      "checkDate": "2024-07-18"
+    },
+    {
+      "weekOneStart": "2024-07-07",
+      "weekOneEnd": "2024-07-13",
+      "weekTwoStart": "2024-07-14",
+      "weekTwoEnd": "2024-07-20",
+      "checkDate": "2024-08-01"
+    },
+    {
+      "weekOneStart": "2024-07-21",
+      "weekOneEnd": "2024-07-27",
+      "weekTwoStart": "2024-07-28",
+      "weekTwoEnd": "2024-08-03",
+      "checkDate": "2024-08-15"
+    },
+    {
+      "weekOneStart": "2024-08-04",
+      "weekOneEnd": "2024-08-10",
+      "weekTwoStart": "2024-08-11",
+      "weekTwoEnd": "2024-08-17",
+      "checkDate": "2024-08-29"
+    },
+    {
+      "weekOneStart": "2024-08-18",
+      "weekOneEnd": "2024-08-24",
+      "weekTwoStart": "2024-08-25",
+      "weekTwoEnd": "2024-08-31",
+      "checkDate": "2024-09-12"
+    },
+    {
+      "weekOneStart": "2024-09-01",
+      "weekOneEnd": "2024-09-07",
+      "weekTwoStart": "2024-09-08",
+      "weekTwoEnd": "2024-09-14",
+      "checkDate": "2024-09-26"
+    },
+    {
+      "weekOneStart": "2024-09-15",
+      "weekOneEnd": "2024-09-21",
+      "weekTwoStart": "2024-09-22",
+      "weekTwoEnd": "2024-09-28",
+      "checkDate": "2024-10-10"
+    },
+    {
+      "weekOneStart": "2024-09-29",
+      "weekOneEnd": "2024-10-05",
+      "weekTwoStart": "2024-10-06",
+      "weekTwoEnd": "2024-10-12",
+      "checkDate": "2024-10-24"
+    },
+    {
+      "weekOneStart": "2024-10-13",
+      "weekOneEnd": "2024-10-19",
+      "weekTwoStart": "2024-10-20",
+      "weekTwoEnd": "2024-10-26",
+      "checkDate": "2024-11-07"
+    },
+    {
+      "weekOneStart": "2024-10-27",
+      "weekOneEnd": "2024-11-02",
+      "weekTwoStart": "2024-11-03",
+      "weekTwoEnd": "2024-11-09",
+      "checkDate": "2024-11-21"
+    },
+    {
+      "weekOneStart": "2024-11-10",
+      "weekOneEnd": "2024-11-16",
+      "weekTwoStart": "2024-11-17",
+      "weekTwoEnd": "2024-11-23",
+      "checkDate": "2024-12-05"
+    },
+    {
+      "weekOneStart": "2024-11-24",
+      "weekOneEnd": "2024-11-30",
+      "weekTwoStart": "2024-12-01",
+      "weekTwoEnd": "2024-12-07",
+      "checkDate": "2024-12-19"
+    },
+    {
+      "weekOneStart": "2024-12-08",
+      "weekOneEnd": "2024-12-14",
+      "weekTwoStart": "2024-12-15",
+      "weekTwoEnd": "2024-12-21",
+      "checkDate": "2025-01-02"
+    },
+    {
+      "weekOneStart": "2024-12-22",
+      "weekOneEnd": "2024-12-28",
+      "weekTwoStart": "2024-12-29",
+      "weekTwoEnd": "2025-01-04",
+      "checkDate": "2025-01-16"
+    },
+    {
+      "weekOneStart": "2025-01-05",
+      "weekOneEnd": "2025-01-11",
+      "weekTwoStart": "2025-01-12",
+      "weekTwoEnd": "2025-01-18",
+      "checkDate": "2025-01-30"
+    },
+    {
+      "weekOneStart": "2025-01-19",
+      "weekOneEnd": "2025-01-25",
+      "weekTwoStart": "2025-01-26",
+      "weekTwoEnd": "2025-02-01",
+      "checkDate": "2025-02-13"
+    },
+    {
+      "weekOneStart": "2025-02-02",
+      "weekOneEnd": "2025-02-08",
+      "weekTwoStart": "2025-02-09",
+      "weekTwoEnd": "2025-02-15",
+      "checkDate": "2025-02-27"
+    },
+    {
+      "weekOneStart": "2025-02-16",
+      "weekOneEnd": "2025-02-22",
+      "weekTwoStart": "2025-02-23",
+      "weekTwoEnd": "2025-03-01",
+      "checkDate": "2025-03-13"
+    },
+    {
+      "weekOneStart": "2025-03-02",
+      "weekOneEnd": "2025-03-08",
+      "weekTwoStart": "2025-03-09",
+      "weekTwoEnd": "2025-03-15",
+      "checkDate": "2025-03-27"
+    },
+    {
+      "weekOneStart": "2025-03-16",
+      "weekOneEnd": "2025-03-22",
+      "weekTwoStart": "2025-03-23",
+      "weekTwoEnd": "2025-03-29",
+      "checkDate": "2025-04-10"
+    },
+    {
+      "weekOneStart": "2025-03-30",
+      "weekOneEnd": "2025-04-05",
+      "weekTwoStart": "2025-04-06",
+      "weekTwoEnd": "2025-04-12",
+      "checkDate": "2025-04-24"
+    },
+    {
+      "weekOneStart": "2025-04-13",
+      "weekOneEnd": "2025-04-19",
+      "weekTwoStart": "2025-04-20",
+      "weekTwoEnd": "2025-04-26",
+      "checkDate": "2025-05-08"
+    },
+    {
+      "weekOneStart": "2025-04-27",
+      "weekOneEnd": "2025-05-03",
+      "weekTwoStart": "2025-05-04",
+      "weekTwoEnd": "2025-05-10",
+      "checkDate": "2025-05-22"
+    },
+    {
+      "weekOneStart": "2025-05-11",
+      "weekOneEnd": "2025-05-17",
+      "weekTwoStart": "2025-05-18",
+      "weekTwoEnd": "2025-05-24",
+      "checkDate": "2025-06-05"
+    },
+    {
+      "weekOneStart": "2025-05-25",
+      "weekOneEnd": "2025-05-31",
+      "weekTwoStart": "2025-06-01",
+      "weekTwoEnd": "2025-06-07",
+      "checkDate": "2025-06-19"
+    },
+    {
+      "weekOneStart": "2025-06-08",
+      "weekOneEnd": "2025-06-14",
+      "weekTwoStart": "2025-06-15",
+      "weekTwoEnd": "2025-06-21",
+      "checkDate": "2025-07-03"
+    }
+  ]
+  
