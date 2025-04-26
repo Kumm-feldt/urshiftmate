@@ -1,19 +1,24 @@
 import React from "react"
 import SidebarChildren from "./SidebarChildren"
 import "./Sidebar.css"
-const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar", "Profile"]
-const icons = [<span className='material-symbols-outlined'>
-    dashboard
-    </span>, <span className='material-symbols-outlined'>
-settings
-</span>,
-    <span className="material-symbols-outlined">
-    perm_contact_calendar
-    </span>,
-    <span className='material-symbols-outlined'>
-    account_circle
-    </span>
-    ];
+import Dashboard from "./Dashboard";
+import Settings from "./Settings";
+import JobsCalendar from "./JobsCalendar";
+import Profile from "./Profile";
+
+
+const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar", "Profile"];
+
+const icons = [
+<i class="bi bi-speedometer2"></i>,
+<i class="bi bi-gear"></i>,
+<i class="bi bi-calendar-week"></i> ,
+<i class="bi bi-person-circle"></i>
+];
+
+
+const routes = ["dashboard", "settings", "jobs", "profile"];
+
     
 const Sidebar = ()=>{
     return(
@@ -29,7 +34,7 @@ const Sidebar = ()=>{
             <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 sidebar-div">
                 <ul className="space-y-2 font-medium">
 
-            <SidebarChildren elements = {sidebarElements} icons={icons}>
+            <SidebarChildren elements = {sidebarElements} icons={icons} routes={routes} >
 
             </SidebarChildren>
                 </ul>

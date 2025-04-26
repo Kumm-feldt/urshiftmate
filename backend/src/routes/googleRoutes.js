@@ -4,9 +4,14 @@ const { isAuthenticated } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.get("/detailedEvents", isAuthenticated, googleController.getDetailEvents);
+router.use("/api", googleController.dataCollector );
 
-router.get("/summaryEvents", isAuthenticated, googleController.getDetailEvents ,googleController.getSummaryEvents);
+router.get("/api/detailedEvents",googleController.getDetailEvents);
+
+router.get("/api/summaryEvents",  googleController.getSummaryEvents);
+
+router.get("/api/summaryUser",  googleController.getSummaryUser);
+
 
 
 module.exports = router;

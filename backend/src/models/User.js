@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
     email: String,
     token: String,
     refreshToken: String,
+
     calendars: {
         type: [String],
         default: "Primary"

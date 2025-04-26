@@ -6,19 +6,59 @@
 
 }
 
+
+
 .table-holder{
-    margin-top: 100px;
-    background-color: #f4f7fb;
-    width: 500px;
-    border-radius: 8px;
-    
+    margin-top: 10px;
+    width: auto;
+    border-radius: 10px;
 }
 
 .h2-title-table{
     font-family: "Roboto", sans-serif;
-    border-bottom: 1px solid black;
+    border-bottom: 3px solid black;
     text-align: center;
-    margin: 20px 20px 10px;
+    margin: 40px 20px 10px;
     font-size: 18px;
     font-weight: 500;
+    padding-bottom: 13px;
+}
+.h1-title-table{
+    font-family: "Roboto", sans-serif;
+    margin: 20px 20px 10px;
+    font-size: 28px;
+    font-weight: 900;
+    margin-top: 40px;
+}
+
+
+.dashboard-toggle-bar{
+    margin-top: 50px;
+    display: flex;
+    color: #00122c;
+    background-color: #f4f7fb;
+
+    border-radius: 20px;
+    height: 35px;
+
+}
+
+.toggle-active{
+    color: white;
+    background-color: #00122c;
+    border-radius: 20px;
+
+}
+
+.dashboard-toggle{
+    width: 50%;
+    text-align: center;
+    padding: 5px;
+    font-weight: 700;
+    cursor: pointer;
+
+}
+
+.table-inactive{
+    display: none;
 }

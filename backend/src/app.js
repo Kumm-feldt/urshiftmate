@@ -42,4 +42,11 @@ app.use("/auth", authRoutes);
 app.use("/google", googleRoutes);
 app.use("/user/config", userConfigRoutes);
 
+
+app.use((err, req, res, next) => {
+  console.error("Global Error:", err);
+  res.status(500).json({ error: err.message || "Internal Server Error" });
+});
+
+
 module.exports = app;

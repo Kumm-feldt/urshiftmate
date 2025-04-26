@@ -15,10 +15,12 @@
     "@fullcalendar/react": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.15",
     "@tailwindcss/postcss": "^4.0.9",
+    "bootstrap-icons": "^1.11.3",
     "flowbite": "^3.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.4.0"
+    "react-router-dom": "^7.4.0",
+    "wouter": "^3.7.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

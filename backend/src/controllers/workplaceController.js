@@ -24,14 +24,11 @@ async function addWorkplace (req, res) {
   };
 
   async function getWorkplace (req, res) {
-    const { workplace, hourlyRate } = req.body;
     const userId = req.session.googleId;
   
-    const newWorkplace = new Workplace({
-      userId,
-      workplace,
-      hourlyRate,
-    });
+    const workplaces = await Workplace.find({userId});
+
+    // more code
 
   try{
     await newWorkplace.save();
