@@ -2,6 +2,7 @@ const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
 require('dotenv').config();
+const path = require("path");
 
 
 const authRoutes = require("./routes/authRoutes");
@@ -21,10 +22,14 @@ const FileStore = sessionFileStore(expressSession)
 
 app.use(express.json());
 app.use(session({
+    name: "sc.sid",                // new cookie name helps dodge stale cookies
   secret: config.sessionSecret,
   resave: false,
   saveUninitialized: false,
-  store: new FileStore(),
+  store: new FileStore({
+    retries: 0,               // stop noisy “will retry” logs
+    ttl: 60 * 60 * 24 * 7,    // 7 days; adjust as needed
+  }),
   cookie: {
     secure: false, 
     httpOnly: true,

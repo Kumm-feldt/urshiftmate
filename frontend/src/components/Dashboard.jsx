@@ -78,10 +78,12 @@ const Dashboard = ({showSidebar = true}) => {
     (async () => {
       // 1) auth gate
       const auth = await api.ensureAuth();
+
       if (!auth.isAuthenticated) {
         if (!alive) return;
-        window.location.replace("/login");
-        return;
+        console.log("bro not authentificated")
+        //window.location.replace("/login");
+        //return;
       }
       // 2) fetch in parallel
       if(alive){

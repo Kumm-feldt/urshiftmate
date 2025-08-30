@@ -9,12 +9,11 @@ router.get("/logout", logout);
 
 
 router.get("/status", (req, res) => {
+  console.log("hello")
   if (req.session?.isAuthenticated) {
-    // Prevent stale caches
-    res.set("Cache-Control", "no-store");
+
     return res.json({ isAuthenticated: true, user: req.session.userId });
   }
-  res.set("Cache-Control", "no-store");
   return res.status(401).json({ isAuthenticated: false });
 });
 

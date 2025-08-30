@@ -23,6 +23,8 @@ export function requireAuth(req, res, next){
 }
 */
 exports.isAuthenticated = (req, res, next) => {
+    console.log("isAuthenticates: ---------- ", req.session.isAuthenticated)
+
     if (req.session.isAuthenticated) { // Check session instead of cookies
       return next();
     }
