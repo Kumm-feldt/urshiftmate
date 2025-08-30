@@ -2,7 +2,7 @@ const { User } = require("../models/User");
 const { google } = require("googleapis");
 require('dotenv').config();
 const crypto = require('crypto');
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
 
 
 const oauth2Client = new google.auth.OAuth2(
@@ -70,20 +70,6 @@ exports.oAuth2CallbackHandler = async (req, res) => {
       user.refreshToken = tokens.refresh_token;
       await user.save();
     }
-
-    // Set user session
-    req.session.googleId = googleId;
-    req.session.isAuthenticated = true;
-
-    // create JWT token
-    const token = jwt.sign(
-    { 
-      sub: user._id.toString(),  
-      googleId: user.googleId
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
 
   res.redirect("http://localhost:3000/dashboard");
 

@@ -9,6 +9,7 @@
     "express-handlebars": "^8.0.1",
     "express-session": "^1.18.1",
     "http": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
     "mongod": "^2.0.0",
     "mongoose": "^8.12.1",
     "node": "^18.20.7",

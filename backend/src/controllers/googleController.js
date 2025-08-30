@@ -196,6 +196,7 @@ async function getEvents(googleId, dates, week)
 {
   let startDate = new Date()
   let endDate = new Date()
+  let allEvents = []
 
   if(week == "first"){
      startDate = new Date(dates.weekOneStart).toISOString();
@@ -205,9 +206,12 @@ async function getEvents(googleId, dates, week)
      endDate = new Date(dates.weekTwoEnd).toISOString();
   }
 
-
   try{
     const refreshToken = await getRefreshToken(googleId);
+    let activeCalendars = await User.find({googleId:googleId},  {calendars:1} ); // only calendars
+    if(activeCalendars.length == 0){
+      return null
+    }
     
     if (!refreshToken) {
       throw new Error("No refresh token found. Please re-authenticate.");
@@ -215,17 +219,19 @@ async function getEvents(googleId, dates, week)
   
       oauth2Client.setCredentials({ refresh_token: refreshToken });
       const calendar = google.calendar({ version: "v3", auth: oauth2Client });
-  
+
+    for (const calendar of activeCalendars) {
       const response = await calendar.events.list({
-        calendarId: "c_7975778d748742b67dab5baa7ee47365a2f73f30e5f0a2c36085912a5cc07580@group.calendar.google.com",
+        calendarId: calendar.calendarId,
         timeMin: startDate,
         timeMax: endDate,
         singleEvents: true,
         orderBy: "startTime",
       });
+      allEvents.push(...response.data.items); // note spread if you want flat array
+    }
 
-      return response.data.items;
-
+  return allEvents;
 
 } catch (error) {
     console.error("Error fetching events:", error);
@@ -300,6 +306,9 @@ async function filterEvents(googleId, eventList){
 }
 
 async function summaryEvents(filteredEvents){
+  if(filterEvents == null){
+    return []
+  }
 try{
   let summaryOfEvents = [];
   let existingSummary;
@@ -402,13 +411,25 @@ async function dataCollector(req, res, next){
         // obtain a list of events from the active calendars (in DB) and according to the week prompted
         const firstWeekEvents = await getEvents( googleId, dateObject, "first");
         const secondWeekEvents = await getEvents( googleId, dateObject, "second");
-        
-        if (!firstWeekEvents || !secondWeekEvents) {
+
+        if (!firstWeekEvents && !secondWeekEvents) {
           throw httpError(404, "No events returned for the given dates.");
         }
 
-        let firstWeekFilteredData = await filterEvents(googleId, firstWeekEvents);
-        let secondWeekFilteredData = await filterEvents(googleId, secondWeekEvents);
+        let firstWeekFilteredData;
+        let secondWeekFilteredData;
+
+        if(!firstWeekEvents ) {
+          secondWeekFilteredData = await filterEvents(googleId, secondWeekEvents);
+          firstWeekFilteredData = null
+        }else if(!secondWeekEvents){
+          firstWeekFilteredData = await filterEvents(googleId, firstWeekEvents);
+          secondWeekFilteredData = null
+        }else{
+          firstWeekFilteredData = await filterEvents(googleId, firstWeekEvents);
+          secondWeekFilteredData = await filterEvents(googleId, secondWeekEvents);
+        }
+
 
         res.locals.filteredData = {
           "first" : firstWeekFilteredData,

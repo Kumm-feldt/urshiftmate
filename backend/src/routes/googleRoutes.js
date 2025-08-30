@@ -1,7 +1,7 @@
 const express = require("express");
 const googleController = require("../controllers/googleController");
 const { isAuthenticated } = require("../middlewares/authMiddleware");
-import { asyncHandler } from "../middlewares/asyncHandler";
+const { asyncHandler } = require("../middlewares/asyncHandler");
 
 const router = express.Router();
 
