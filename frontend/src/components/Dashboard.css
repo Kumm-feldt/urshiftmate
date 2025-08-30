@@ -26,9 +26,11 @@
 .h1-title-table{
     font-family: "Roboto", sans-serif;
     margin: 20px 20px 10px;
-    font-size: 28px;
-    font-weight: 900;
+    font-size: 25px;
+    font-weight: 500;
     margin-top: 40px;
+    margin-bottom: 30px;
+    color: #000000af;
 }
 
 
@@ -61,4 +63,31 @@
 
 .table-inactive{
     display: none;
+}
+
+.dashboard-middle .table-container{
+        width: 700px;
+}
+
+.jobs-table-container{
+        width: 320px !important;
+}
+
+.loading{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+   height: 800px;
+}
+
+
+.summary-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 900px;
+}
+
+.arrow-i{
+    cursor: pointer;
 }

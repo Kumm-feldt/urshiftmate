@@ -1,0 +1,81 @@
+/* Change the background */
+.react-calendar {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  
+}
+
+
+
+
+/* Weekdays (Mon–Fri) in the current month */
+.react-calendar__month-view__days__day {
+  color: #333; /* Dark text instead of white */
+}
+
+/* Weekends */
+.react-calendar__month-view__days__day--weekend {
+  color: red; /* Keep weekends red */
+}
+
+/* Days from previous/next month */
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #bbb; /* Faded gray */
+}
+
+
+/* Change hover color */
+.react-calendar__tile:enabled:hover {
+  background-color: #00122cd8;
+  color: white;
+  border-radius: 6px;
+}
+
+/* Change weekday names */
+.react-calendar__month-view__weekdays {
+  color: #444;
+  font-weight: bold;
+}
+
+/* Change today's highlight */
+.react-calendar__tile--now {
+  background:  #00122c;
+  border-radius: 6px;
+  color: white;
+}
+/* Change the active date color */
+.react-calendar__tile--active {
+  background-color: #007bff;
+  color: white;
+  border-radius: 6px;
+}
+
+/* Navigation container (month title + arrows) */
+.react-calendar__navigation {
+  border-radius: 6px;
+  padding: 5px;
+}
+
+
+/* Arrows (left & right) */
+.react-calendar__navigation button {
+  background: none;
+  border: none;
+  color: #00122c; /* Blue arrows */
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+/* Month title (center) */
+.react-calendar__navigation__label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #00122c; /* Blue title */
+}
+
+
+/* Hover effect on arrows */
+.react-calendar__navigation button:hover {
+  color:  #00122c; /* Darker blue on hover */
+}

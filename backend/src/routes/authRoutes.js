@@ -5,15 +5,18 @@ const router = express.Router();
 
 router.get("/google", googleOAuth2ConsentScreen);
 router.get("/google/callback", oAuth2CallbackHandler);
-router.post("/logout", logout);
+router.get("/logout", logout);
 
 
 router.get("/status", (req, res) => {
-    if (req.session.isAuthenticated) {
-        res.json({ isAuthenticated: true, user: req.session.userId });
-    } else {
-        res.json({ isAuthenticated: false });
-    }
+  if (req.session?.isAuthenticated) {
+    // Prevent stale caches
+    res.set("Cache-Control", "no-store");
+    return res.json({ isAuthenticated: true, user: req.session.userId });
+  }
+  res.set("Cache-Control", "no-store");
+  return res.status(401).json({ isAuthenticated: false });
 });
+
 
 module.exports = router;

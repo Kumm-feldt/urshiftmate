@@ -1,0 +1,87 @@
+/* Center the login wrapper */
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;        /* Full viewport height */
+  background: #f8f9fa;  /* Light background in light mode */
+}
+
+@media (prefers-color-scheme: dark) {
+  .login-wrapper {
+    /* Black bottom → bluish/gray top */
+    background: linear-gradient(to top, #000000 0%, #1a1a1a 80%, #2c3e50 100%);
+  }
+  
+}
+.text-xl{
+    font-size: 33px !important;
+    font-weight: 700 !important;
+}
+form{
+    background-color: #00000069;
+    border: none;
+}
+/* Improve the card container */
+.login-wrapper .dark\:bg-gray-800 {
+  background-color: #000000 !important; /* Slightly lighter than pure black */
+  border-color: #3a3a3a !important;
+}
+
+/* Input fields */
+.login-wrapper input {
+  transition: background 0.2s, border 0.2s;
+}
+
+@media (prefers-color-scheme: dark) {
+  .login-wrapper input {
+    background-color: #333 !important;
+    border-color: #444 !important;
+    color: #fff !important;
+  }
+
+  .login-wrapper input::placeholder {
+    color: #aaa !important;
+  }
+}
+
+/* Buttons */
+.login-wrapper button {
+  transition: background 0.2s, transform 0.1s;
+}
+
+.login-wrapper button:hover {
+  transform: translateY(-1px);
+}
+.google-icon{
+    width: 30px;
+    height: auto;
+}
+
+.circle-logo{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 40px;
+    background-color: #4444446f;
+}
+.login-options{
+    color: rgba(255, 255, 255, 0.666);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-text{
+    margin-bottom: 15px;
+}
+
+.max-w-sm {
+    max-width: 32rem;
+}
+.d-height{
+    max-height: 600px;
+}

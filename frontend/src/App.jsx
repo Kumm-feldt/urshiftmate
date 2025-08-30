@@ -6,11 +6,14 @@ import Settings from "./components/Settings";
 import Profile from "./components/Profile";
 import JobsCalendar from "./components/JobsCalendar";
 
+
+
 // Use correct environment variable format
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const App = () => {
   const [auth, setAuth] = useState({ isAuthenticated: false, user: null });
+  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

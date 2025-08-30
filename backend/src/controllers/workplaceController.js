@@ -1,21 +1,36 @@
 // insert workplace
 
+const { User } = require("../models/User");
 const { Workplace } = require("../models/Workplace");
 
 async function addWorkplace (req, res) {
+
     const { workplace, hourlyRate } = req.body;
-    const userId = req.session.googleId;
+    // optionally get it from frontend
+    let userId;
+    if(req.body.userId){
+     userId = req.body.userId;
+    }
   
-    const newWorkplace = new Workplace({
+    try{
+      // if not received, then use session to find it 
+      if(!userId){
+        googleId = String(req.session.googleId);
+        const user = await User.findOne({ googleId });
+
+        if(!user){
+          return res.status(401).json({error: "User not found"})
+        }
+        userId = user._id
+        
+      }
+      const newWorkplace = new Workplace({
       userId,
       workplace,
       hourlyRate,
     });
-
-  try{
     await newWorkplace.save();
     res.json(newWorkplace);
-
   }catch(err){
     console.error("Error adding workplace:", err);
     res.status(500).json({ error: "Failed to add workplace" });
@@ -24,20 +39,28 @@ async function addWorkplace (req, res) {
   };
 
   async function getWorkplace (req, res) {
-    const userId = req.session.googleId;
-  
+    let data = []
+    const googleId = req.session.googleId;
+
+    try{
+    let user = await User.findOne({googleId})
+    let userId = user._id
     const workplaces = await Workplace.find({userId});
 
-    // more code
-
-  try{
-    await newWorkplace.save();
-    res.json(newWorkplace);
-
-  }catch(err){
-    console.error("Error adding workplace:", err);
-    res.status(500).json({ error: "Failed to add workplace" });
-  }
+    if(workplaces.length > 0){
+      workplaces.forEach((job)=>{
+        data.push(
+          {
+          workplace:  job.workplace,
+          hourlyRate: job.hourlyRate
+        }
+      )
+      })
+    }
+    }catch(err){
+      console.log("Error fetching all worplaces")
+    }
+    res.json(data)
 
   };
 

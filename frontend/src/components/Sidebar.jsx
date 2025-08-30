@@ -7,22 +7,35 @@ import JobsCalendar from "./JobsCalendar";
 import Profile from "./Profile";
 
 
-const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar", "Profile"];
+const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar"];
 
 const icons = [
 <i class="bi bi-speedometer2"></i>,
 <i class="bi bi-gear"></i>,
 <i class="bi bi-calendar-week"></i> ,
-<i class="bi bi-person-circle"></i>
+
 ];
 
 
 const routes = ["dashboard", "settings", "jobs", "profile"];
 
-    
+const bottomRoutes = [ "profile", "logout"];
+const bottomIcons = [<i class="bi bi-person-circle"></i>, <i class="bi bi-box-arrow-right"></i>]
+const bottomSideElements = [ "Profile", "Logout"];
+const date = new Date();
+const formatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit'
+});
+
+
+const formattedDate = formatter.format(date);
+
+
 const Sidebar = ()=>{
     return(
-        <>
+        <div>
         <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar" type="button" className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
             <span className="sr-only">Open sidebar</span>
             <svg className="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -30,17 +43,29 @@ const Sidebar = ()=>{
             </svg>
         </button>
 
-        <aside id="default-sidebar" className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
-            <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 sidebar-div">
-                <ul className="space-y-2 font-medium">
+        <aside id="default-sidebar" className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 " aria-label="Sidebar">
+            <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 sidebar-div sidebar-wrapper">
+            <div className="icons-top">
+            <h2 className="h2-title-sidebar">{formattedDate}</h2>
+               
+                <ul className="space-y-2 font-medium icons-top-ul">
 
             <SidebarChildren elements = {sidebarElements} icons={icons} routes={routes} >
 
             </SidebarChildren>
+
                 </ul>
             </div>
+
+            <div className="icons-bottom">
+            <ul className="space-y-2 font-medium icons-bottom-ul">
+            <SidebarChildren elements = {bottomSideElements} icons={bottomIcons} routes={bottomRoutes} >
+            </SidebarChildren>
+            </ul>
+            </div>
+            </div>
         </aside>
-      </>
+      </div>
     )
 }
 

@@ -1,38 +1,74 @@
-const summaryRender = (data)=>(
-    
-        data.map((eventData, index) =>(
+const summaryRender = (data = [])=>{
+        let totalHours = 0;
+        let totalWage = 0;
+
+        let rows =  data.map((eventData, index) =>{
+            const wage = Number(eventData.wage) || 0;           // hourly wage
+            const hours = Number(eventData.totalHours) || 0;    // hours worked
+
+            totalHours += hours;
+            totalWage  += (wage * hours);
+
+            return(
+                    <tr key={index} className="odd:bg-white  even:bg-gray-50  border-b  border-gray-200">
+                            <td className="px-6 py-4">
+                            {eventData.workplace}
+                            </td> 
+                            <td className="px-6 py-4">
+                            ${(eventData.wage).toFixed(2)}
+                            </td> 
+                            <td className="px-6 py-4">
+                            {eventData.totalHours}
+                            </td> 
+                            <td className="px-6 py-4">
+                            ${(eventData.totalWage).toFixed(2)}
+                            </td> 
+                    </tr>
+            )
          
-         <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
+        })
+        rows.push(
          
-             <td className="px-6 py-4">
-             {eventData.workplace}
-             </td> 
-             <td className="px-6 py-4">
-             {eventData.wage}
-             </td> 
-             <td className="px-6 py-4">
-             {eventData.totalHours}
-             </td> 
-             <td className="px-6 py-4">
-             {eventData.totalWage}
-             </td> 
+    <tr key={`total-row`} className="bg-gray-100 border-t border-gray-300">
+      <td className="px-6 py-4 font-semibold"><strong>Total:</strong></td>
+      <td className="px-6 py-4"></td>
+      <td className="px-6 py-4 font-semibold"><strong>{totalHours}</strong></td>
+      <td className="px-6 py-4 font-semibold"><strong>${totalWage.toFixed(2)}</strong></td>
+    </tr>
              
-             </tr>
+            )
 
-        ))
-    )
-
-const detailedRender = (data) =>(
-    
-        data.map((eventData, index) =>(
+             return rows
+        }
+const jobsRender = (data) =>(
+    data.map((jobData, index)=>(
+         <tr key={index} className="odd:bg-white  even:bg-gray-50  border-b  border-gray-200">
          
-         <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
+             <td className="px-6 py-4">
+             {jobData.workplace}
+             </td> 
+             <td className="px-6 py-4">
+             ${(jobData.hourlyRate)}
+             </td> 
+        </tr>
+    ))
+)
+
+
+const detailedRender = (data = []) =>{
+    let totalHours = 0;
+
+     let rows = data.map((eventData, index) =>{
+        const hours = eventData.totalHours
+        totalHours += hours
+         return (<tr key={index} className="odd:bg-white  even:bg-gray-50  border-b  border-gray-200">
          
              <td className="px-6 py-4">
              {eventData.workplace}
              </td> 
-             <td className="px-6 py-4">
-             {eventData.wage}
+
+            <td className="px-6 py-4">
+             {eventData.date}
              </td> 
              <td className="px-6 py-4">
              {eventData.startTime}
@@ -44,10 +80,35 @@ const detailedRender = (data) =>(
              {eventData.totalHours}
              </td> 
              
-             </tr>
+             </tr>)
 
-        ))
+        })
+
+     
+    rows.push(
+        <tr key={'total-detailed'} className="odd:bg-white  even:bg-gray-50  border-b  border-gray-200">
+         
+             <td className="px-6 py-4">
+            <strong>Total:</strong> 
+             </td> 
+
+              <td className="px-6 py-4">
+             </td> 
+              <td className="px-6 py-4">
+             </td> 
+                           <td className="px-6 py-4">
+             </td> 
+
+             <td className="px-6 py-4">
+             <strong>{totalHours}</strong>
+             </td> 
+             
+        </tr>
     )
+
+    return rows
+    
+}
 
 
 const TableBody = ({data, renderType}) =>{
@@ -56,7 +117,8 @@ const TableBody = ({data, renderType}) =>{
         rows = detailedRender(data);
     }else if(renderType === "Summary"){
         rows = summaryRender(data);
-
+    }else if(renderType == "Jobs"){
+        rows = jobsRender(data)
     }
 
 

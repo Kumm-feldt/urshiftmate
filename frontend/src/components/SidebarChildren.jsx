@@ -10,7 +10,6 @@ const SidebarChildren = ({elements, icons, routes})=>{
                 {icons[index]}
                 <Link to={routes[index]}>
                 <span className="ms-3">{element}</span>
-                   
                 </Link>
                 
                

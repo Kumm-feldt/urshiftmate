@@ -7,10 +7,18 @@ POST {{url}}/user/config/workplace
 Content-Type: application/json
 
 {
-    "userId" : 103287971580046408707,
-    "workplace": "Einsteins",
-    "hourlyRate": 11
+
+    "workplace": "PS",
+    "hourlyRate": 11,
+    "userId" : "6802a8e6a69534b1170d28a5"
 }
 
 ###
 GET {{url}}/google/summaryEvents
+
+###
+GET {{url}}/auth/status
+
+
+###
+GET {{url}}/user/config/randomPhrase?phraseType=negative

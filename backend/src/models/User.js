@@ -2,20 +2,30 @@ const { calendar } = require('googleapis/build/src/apis/calendar');
 const mongoose = require('mongoose')
 
 
-const UserSchema = new mongoose.Schema({
-    googleId: String,
-    name: String,
-    email: String,
-    token: String,
-    refreshToken: String,
+// Sub Schema for Calendar
+const CalendarSchema = new mongoose.Schema({
+    calendarId: {type: String, required: true, trim: true},
+    calendarName: {type: String, required: true, trim: true},
+}, 
+{ _id: false } // avoid subdoc _id 
+)
 
+
+const UserSchema = new mongoose.Schema(
+  {
+    googleId: { type: String, required: true, unique: true, index: true },
+    name: { type: String, trim: true },
+    email: { type: String, lowercase: true, trim: true, index: true, unique: true },
+    token: { type: String, select: false },         // consider encrypting
+    refreshToken: { type: String, select: false },  // consider encrypting
     calendars: {
-        type: [String],
-        default: "Primary"
-    },
-    createdAt: {type: Date, default: Date.now},
-    updatedAt: {type: Date, default: Date.now}
-})
+      type: [CalendarSchema],
+      default: []
+    }
+  },
+  { timestamps: true }
+);
+
 
 const User = mongoose.model('User', UserSchema);
 module.exports = {User};

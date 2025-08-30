@@ -1,0 +1,52 @@
+.cal-li{
+    background-color: #f4f7fb;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 10px;
+}
+.h2-title{
+    font-size: 18px;
+    margin: 10px;
+    font-weight: 800;
+}
+
+.cal-li:hover{
+    background-color: #00122c84;
+    color: white;
+    cursor: pointer;
+}
+
+.active-cal{
+    background-color: #00122c;
+    color: white;
+    cursor: pointer;
+}
+
+.flex-row-calendars{
+    display: flex;
+
+}
+
+.dashboard-div-container ul li{
+    width: 350px;
+    text-align: center;
+
+}
+
+.dashboard-div-container ul{
+    margin: 10px 30px;
+}
+
+/* ------------- Responsive ------------ */
+
+@media (max-width: 1440px) {
+
+        .dashboard-div-container ul{
+            margin: 10px 15px;
+        }
+
+        .dashboard-div-container ul li{
+            width: 280px;
+        font-size: 0.8rem ;
+        }
+}
