@@ -28,12 +28,14 @@ app.use(session({
   saveUninitialized: false,
   store: new FileStore({
     retries: 0,               // stop noisy “will retry” logs
-    ttl: 60 * 60 * 24 * 7,    // 7 days; adjust as needed
+    ttl: 60 * 60 * 24 * 14,    // 14 days; adjust as needed
   }),
   cookie: {
     secure: false, 
     httpOnly: true,
     sameSite: "lax",
+    maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days
+
   },
 }));
 
