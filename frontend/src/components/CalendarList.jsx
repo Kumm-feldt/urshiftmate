@@ -14,7 +14,7 @@ function render (allCalendars){
     for(let i = 0; i < allCalendars.length; i++){
       
         calendarList.unshift( 
-                <CalendarElement calendarData={allCalendars[i]}></CalendarElement>
+                <CalendarElement key={`${i}-cal`}calendarData={allCalendars[i]}></CalendarElement>
                 )
         
     }

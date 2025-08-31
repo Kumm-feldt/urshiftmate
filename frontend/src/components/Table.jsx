@@ -5,8 +5,8 @@ import './Table.css';
 
 const Table = ({columns, data, renderType}) =>{
     let classN = "py-4 table-container ";
-if(data.length == 0){
-    return(<p>No available data</p>)
+if(!data || data.length == 0){
+    return(<p className='no-data-p'>No available data</p>)
 }
 if(renderType == 'Jobs'){
     classN = classN + " jobs-table-container"

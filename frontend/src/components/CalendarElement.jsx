@@ -4,7 +4,7 @@ import * as api from "../api.js"
 import "./CalendarList.css"
 
 
-export default function CalendarElement({calendarData}){
+export default function CalendarElement({ calendarData}){
     const [active, setActive] = useState(false)
     const [calendar, setCalendar] = useState(null)
     const [primary, setPrimary] = useState(false)
@@ -13,7 +13,8 @@ export default function CalendarElement({calendarData}){
 
 
     // function to activate or not the calendar
-    async function toggleCalendar(){
+    async function handleToggleCalendar(){
+        console.log(calendar)
         await api.toggleCalendar(calendarId, calendar, active, primary);
         setActive(!active)
     }
@@ -28,7 +29,8 @@ export default function CalendarElement({calendarData}){
 
     return(
         <>
-             <li onClick={toggleCalendar}>
+        
+             <li onClick={handleToggleCalendar}>
                     <div className={active? "cal-li active-cal":"cal-li"}>
                     {calendarData.calendarSummary}
                     </div>

@@ -6,6 +6,7 @@ import Settings from "./components/Settings";
 import Profile from "./components/Profile";
 import JobsCalendar from "./components/JobsCalendar";
 
+import { AuthContext } from "./AuthContext";
 
 
 // Use correct environment variable format
@@ -35,17 +36,18 @@ const App = () => {
 
 
   return (
+      <AuthContext.Provider value={{ auth, setAuth }}>
     <Router>
       <Routes>
         <Route path="/login" element={auth.isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/dashboard" element={auth.isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
         <Route path="/settings" element={auth.isAuthenticated ? <Settings /> : <Navigate to="/login" />} />
         <Route path="/profile" element={auth.isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
-        <Route path="/dashboard/jobs" element={auth.isAuthenticated ? <JobsCalendar /> : <Navigate to="/login" />} />
-
+        <Route path="/jobs" element={auth.isAuthenticated ? <JobsCalendar /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to={auth.isAuthenticated ? "/dashboard" : "/login"} />} />
       </Routes>
     </Router>
+    </AuthContext.Provider>
   );
 };
 

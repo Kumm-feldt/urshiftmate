@@ -5,13 +5,17 @@ const { asyncHandler } = require("../middlewares/asyncHandler");
 
 const router = express.Router();
 
+// returns true or false if there is calendars in db if it is true do not call the other endpoints (in the frontend)
+// I avoided using .use() because it needs to access ?index query param 
+router.get("/api/user/info", asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.getIndependentUserSummary))
 
+router.get("/api/existCalendars", asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.existCalendarsInDb));
 
-router.get("/api/detailedEvents", asyncHandler(googleController.dataCollector), asyncHandler(googleController.getDetailEvents));
+router.get("/api/detailedEvents",asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.dataCollector), asyncHandler(googleController.getDetailEvents));
 
-router.get("/api/summaryEvents",  asyncHandler(googleController.dataCollector),  asyncHandler(googleController.getSummaryEvents));
+router.get("/api/summaryEvents",  asyncHandler(googleController.independentUserSummary),asyncHandler(googleController.dataCollector),  asyncHandler(googleController.getSummaryEvents));
 
-router.get("/api/summaryUser",   asyncHandler(googleController.dataCollector), asyncHandler(googleController.getSummaryUser));
+router.get("/api/summaryUser",  asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.dataCollector), asyncHandler(googleController.getSummaryUser));
 
 
 

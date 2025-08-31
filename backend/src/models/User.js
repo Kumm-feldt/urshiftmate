@@ -16,8 +16,8 @@ const UserSchema = new mongoose.Schema(
     googleId: { type: String, required: true, unique: true, index: true },
     name: { type: String, trim: true },
     email: { type: String, lowercase: true, trim: true, index: true, unique: true },
-    token: { type: String, select: false },         // consider encrypting
-    refreshToken: { type: String, select: false },  // consider encrypting
+    token: { type: String },         // consider encrypting
+    refreshToken: { type: String},  // consider encrypting
     calendars: {
       type: [CalendarSchema],
       default: []

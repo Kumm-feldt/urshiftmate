@@ -5,23 +5,23 @@ import Dashboard from "./Dashboard";
 import Settings from "./Settings";
 import JobsCalendar from "./JobsCalendar";
 import Profile from "./Profile";
-
+import LogoutButton from "./LogoutButton";
 
 const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar"];
 
 const icons = [
-<i class="bi bi-speedometer2"></i>,
-<i class="bi bi-gear"></i>,
-<i class="bi bi-calendar-week"></i> ,
+<i className="bi bi-speedometer2"></i>,
+<i className="bi bi-gear"></i>,
+<i className="bi bi-calendar-week"></i> ,
 
 ];
 
 
-const routes = ["dashboard", "settings", "jobs", "profile"];
+const routes = ["/dashboard", "/settings", "/jobs", "/profile"];
 
-const bottomRoutes = [ "profile", "logout"];
-const bottomIcons = [<i class="bi bi-person-circle"></i>, <i class="bi bi-box-arrow-right"></i>]
-const bottomSideElements = [ "Profile", "Logout"];
+const bottomRoutes = [ "/profile"];
+const bottomIcons = [<i className="bi bi-person-circle"></i>, <i className="bi bi-box-arrow-right"></i>]
+const bottomSideElements = [ "Profile"];
 const date = new Date();
 const formatter = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -61,6 +61,7 @@ const Sidebar = ()=>{
             <ul className="space-y-2 font-medium icons-bottom-ul">
             <SidebarChildren elements = {bottomSideElements} icons={bottomIcons} routes={bottomRoutes} >
             </SidebarChildren>
+            <LogoutButton ></LogoutButton>
             </ul>
             </div>
             </div>

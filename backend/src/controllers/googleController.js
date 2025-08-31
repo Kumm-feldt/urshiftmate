@@ -4,6 +4,7 @@ const { builtinModules } = require("module");
 const {Workplace} = require("../models/Workplace");
 const {User} = require("../models/User");
 const dateFile = require("./dates.json");
+const moment = require("moment-timezone");
 
 require('dotenv').config();
 
@@ -16,25 +17,40 @@ const oauth2Client = new google.auth.OAuth2(
 
 // ############################ Helper Functions ##############################
 
+function startOfDayLocal(d) {
+  return moment.tz(d, "America/Chicago").startOf("day");
+
+}
+function endOfDayLocal(d) {
+  return moment.tz(d, "America/Chicago").endOf("day");
+}
+
 function getDates(ind = 0) {
-  let index = Number(ind)
-  let currentDate = new Date(); // parse the input string as Date
+  const index = Number(ind);
+  const now =  new Date();
+  const today = startOfDayLocal(now);
+
 
   for(let i = 0; i<dateFile.length; i++){
-    const from = new Date(dateFile[i].weekOneStart);
-    const to = new Date(dateFile[i].weekTwoEnd);
+    const from = startOfDayLocal(new Date(dateFile[i].weekOneStart)); // parse and normalize local
+    const to   = endOfDayLocal(new Date(dateFile[i].weekTwoEnd));     // inclusive end-of-day
 
-    if (currentDate >= from && currentDate <= to) {
+   if (today >= from && today <= to) {
+
+      const next = dateFile[i + index];
+
+      if (!next) return null; // guard against out-of-bounds
       return {
-        weekOneStart: dateFile[i + index].weekOneStart,
-        weekOneEnd: dateFile[i + index].weekOneEnd,
-        weekTwoStart: dateFile[i + index].weekTwoStart,
-        weekTwoEnd: dateFile[i + index].weekTwoEnd,
-        checkDay: dateFile[i + index].checkDate,
+        weekOneStart: next.weekOneStart,
+        weekOneEnd:   next.weekOneEnd,
+        weekTwoStart: next.weekTwoStart,
+        weekTwoEnd:   next.weekTwoEnd,
+        checkDay:     next.checkDate,
       };
     }
 
   }
+
 
   return null; // If no match found
 }
@@ -46,15 +62,17 @@ async function isActiveCalendar(googleId, calName, isPrimary){
       return false;
     }
     
-    const calendars = userInfo.calendars;
     const trimmedCalName = calName?.trim(); // Trim the input
 
     
     // Also trim the stored calendar names for comparison
-    const hasMatch = calendars.some(calendar => 
-      calendar.trim() === trimmedCalName || 
-      (isPrimary === true && calendar.trim() === "Primary")
-    );
+   const hasMatch = userInfo.calendars.some(calendarObj => {
+      const storedName = calendarObj.calendarName?.trim();
+      return (
+        storedName === trimmedCalName ||
+        (isPrimary === true && calendarObj.primary === true)
+      );
+    });
     
     return hasMatch;
     
@@ -78,8 +96,6 @@ async function deleteCalendar(req, res){
   if (typeof calendarToDelete !== "string" || !calendarToDelete.trim()) {
     return res.status(400).json({ error: "summary is required" });
   }
-
-
 
     try{
       const check = await User.findOne({googleId});
@@ -119,14 +135,14 @@ async function deleteCalendar(req, res){
 // #### ADD CALENDAR ####
 async function addCalendar(req, res){
   let googleId = req.session?.googleId;
+
   let calendarId = req.body?.calendarId;
   let calendarName = req.body?.summary;
 
+
+
   if (!googleId) {
     return res.status(401).json({ error: "Not authenticated" });
-  }
-  if (typeof calendarName !== "string" || !calendarName.trim()) {
-    return res.status(400).json({ error: "summary is required" });
   }
 
     try{
@@ -165,30 +181,30 @@ async function getGoogleCalendars(req, res, next){
     const response  = await calendar.calendarList.list(); // get the list of available calendars
     if(response.data.items && response.data.items.length > 0){
       // for ... of to handle async functions
-      for(const calendar of response.data.items) {
-          const activeStatus = await isActiveCalendar(googleId, calendar.summary, calendar.primary);
+      for(const cal of response.data.items) {
+          const activeStatus = await isActiveCalendar(googleId, cal.summary, cal.primary);
           calendarList.push({
-            calendarId: calendar.id,
-            calendarSummary: calendar.summary,
-            primary: calendar.primary || false,
+            calendarId: cal.id,
+            calendarSummary: cal.summary,
+            primary: cal.primary || false,
             activeCalendar: activeStatus
           });
         }
+
          res.locals.googleCalendarList = calendarList;
-          return next();
+        return next();
     }
   }catch (error) {
 
       console.error("Error in getDetailEventsMiddleware:", error);
       if (!res.headersSent) {
-        next(error); 
+        return next(error); 
       }
     }
    
 
 
 }
-
 
 // !===================== modify this function to obtain data from other calendars as well ===========
 
@@ -198,44 +214,49 @@ async function getEvents(googleId, dates, week)
   let endDate = new Date()
   let allEvents = []
 
-  if(week == "first"){
-     startDate = new Date(dates.weekOneStart).toISOString();
-     endDate = new Date(dates.weekOneEnd).toISOString();
-  }else{
-     startDate = new Date(dates.weekTwoStart).toISOString();
-     endDate = new Date(dates.weekTwoEnd).toISOString();
+  if (week == "first") {
+    startDate = startOfDayLocal(dates.weekOneStart).toISOString();
+    endDate   = endOfDayLocal(dates.weekOneEnd).toISOString();
+  } else {
+    startDate = startOfDayLocal(dates.weekTwoStart).toISOString();
+    endDate   = endOfDayLocal(dates.weekTwoEnd).toISOString();
   }
 
   try{
     const refreshToken = await getRefreshToken(googleId);
-    let activeCalendars = await User.find({googleId:googleId},  {calendars:1} ); // only calendars
-    if(activeCalendars.length == 0){
-      return null
+    let user = await User.findOne({ googleId }).select("calendars -_id");
+
+    let activeCalendars = user?.calendars || [];
+
+    if (activeCalendars.length === 0) {
+      return null;
     }
-    
+
+
     if (!refreshToken) {
       throw new Error("No refresh token found. Please re-authenticate.");
       }
   
-      oauth2Client.setCredentials({ refresh_token: refreshToken });
-      const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
+    const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
-    for (const calendar of activeCalendars) {
+    for (const cal of activeCalendars) {
       const response = await calendar.events.list({
-        calendarId: calendar.calendarId,
+        calendarId: cal.calendarId,
         timeMin: startDate,
         timeMax: endDate,
         singleEvents: true,
         orderBy: "startTime",
       });
       allEvents.push(...response.data.items); // note spread if you want flat array
+
     }
 
   return allEvents;
 
 } catch (error) {
     console.error("Error fetching events:", error);
-    throw new Error(`Error fetching events: ${error}`);
+    throw new Error(`Error fetching events: ${error}`)
   }
 
 
@@ -259,6 +280,7 @@ function filterDateEvents(startDateTime, endDateTime) {
 }
 
 async function filterEvents(googleId, eventList){
+
   let filteredData = [];
   try{
     let user = await User.find({googleId});
@@ -306,9 +328,7 @@ async function filterEvents(googleId, eventList){
 }
 
 async function summaryEvents(filteredEvents){
-  if(filterEvents == null){
-    return []
-  }
+
 try{
   let summaryOfEvents = [];
   let existingSummary;
@@ -344,14 +364,40 @@ try{
 
 }
 
-async function summaryUser(summaryEvents, dates, googleId){
-  try{
-    let username = await User.findOne(googleId);
-    if(!username){
+async function independentUserSummary(req, res, next){
+  const googleId = req.session.googleId;
+  const dates = getDates(req.query.index);
+  res.locals.dates = dates;
+  
+  if(dates == null)throw httpError(404, "No valid dates")
+
+  let username = await User.findOne({googleId});
+  if(!username){
       username = '';
-    }else{
+  }else{
       username = username.name;
-    }
+  }
+
+  res.locals.username = username
+   res.locals.independentUserSummary = {
+    username: username,
+    checkDay : dates.checkDay,
+    startWeekOne: dates.weekOneStart,
+    endWeekOne: dates.weekOneEnd,
+    startWeekTwo: dates.weekTwoStart,
+    endWeekTwo: dates.weekTwoEnd,
+  };
+  next();
+
+}
+
+async function getIndependentUserSummary(req, res, next){
+
+    return res.json(res.locals.independentUserSummary);
+}
+
+async function summaryUser(summaryEvents, dates, username){
+  try{
     let data = {
       username: username,
       paycheck : 0,
@@ -375,6 +421,7 @@ async function summaryUser(summaryEvents, dates, googleId){
       
     }
     data.taxedPaycheck = (data.paycheck * 0.8898395722).toFixed(2);
+    data.paycheck = data.paycheck.toFixed(2)
     return data;
 
   }catch(err){
@@ -390,27 +437,46 @@ function httpError(statusCode, message) {
   return e;
 }
 
+async function existCalendarsInDb(req, res, next){
+  const googleId = req.session.googleId;
+  try{
+    let user = await User.findOne({ googleId }).select("calendars -_id");
+    let activeCalendars = user?.calendars || [];
+
+    if(!user){
+      throw httpError(404, "No user found.");
+    }
+
+    if(activeCalendars.length ==0){
+      return res.json({calendarExists: false});
+    }else{
+      return res.json({calendarExists: true});
+    }
+
+  }catch(err){
+    throw httpError(500, "Internal Error");
+  }
+  return next()
+
+}
 
 // ############################ API / End Point Data Collector #############################
 async function dataCollector(req, res, next){
         const googleId = req.session.googleId;
         const index = req.query.index;
 
-        
         if (!googleId) throw httpError(401, "Not authenticated with Google.");
         if (index == null) throw httpError(400, "Missing 'index' query param.");
-        
+
         // Obtain an object with the start/end dates from each week with the index (index 0 = current date). 
         // It is retrieved from a JSON file 
-        const dateObject = getDates(index);
-
-        if(dateObject == null)throw httpError(404, "No valid dates")
-
-        res.locals.dates = dateObject;
+        const dateObject = res.locals.dates;
 
         // obtain a list of events from the active calendars (in DB) and according to the week prompted
-        const firstWeekEvents = await getEvents( googleId, dateObject, "first");
+        const firstWeekEvents = await getEvents( googleId, dateObject, "first"); // <-------------- check
         const secondWeekEvents = await getEvents( googleId, dateObject, "second");
+        console.log(secondWeekEvents)
+
 
         if (!firstWeekEvents && !secondWeekEvents) {
           throw httpError(404, "No events returned for the given dates.");
@@ -431,6 +497,7 @@ async function dataCollector(req, res, next){
         }
 
 
+
         res.locals.filteredData = {
           "first" : firstWeekFilteredData,
           "second" : secondWeekFilteredData
@@ -444,10 +511,10 @@ async function dataCollector(req, res, next){
           "first" : firstWSummaryData,
           "second" : secondWSummaryData
         };
-
+        const username = res.locals.username;
         // Provides an array as a general summary of the user's activity. 
         // [ username, paycheck, totalHours, checkDay, startWeekOne, endWeekOne, startWeekTwo, endWeekTwo]
-        let userSummary = await summaryUser([firstWSummaryData, secondWSummaryData], dateObject);
+        let userSummary = await summaryUser([firstWSummaryData, secondWSummaryData], dateObject, username);
 
         res.locals.summaryUser = userSummary;
 
@@ -497,5 +564,5 @@ async function getActiveCalendars(req, res){
 
 
 module.exports = {getSummaryEvents, getDetailEvents, dataCollector, getSummaryUser, getGoogleCalendars, getCalendars, getActiveCalendars,
-  addCalendar, deleteCalendar
+  addCalendar, deleteCalendar, existCalendarsInDb, independentUserSummary, getIndependentUserSummary
 }

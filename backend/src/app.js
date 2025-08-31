@@ -52,10 +52,17 @@ app.use("/logout", logout);
 // Central error handler 
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
+
   const payload = {
     ok: false,
-    message: err.message || "Internal Server Error",
+    error: {
+      code: status,
+      message: err.message || "Internal Server Error",
+      // optional extra fields you might attach in controllers:
+      details: err.details || undefined,
+    },
   };
+
   res.status(status).json(payload);
 });
 

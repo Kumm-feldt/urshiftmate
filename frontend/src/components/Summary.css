@@ -8,16 +8,21 @@
 
 }
 
-.summary-h5, .summary-date, .summary-money-amount{
+.summary-h5, .summary-date, .summary-money-amount, .summary-pretax-money-amount{
     margin: 15px 0px 15px 25px;
 }
 .summary-h5{
     margin-top: 30px;
 }
-.summary-h5, .summary-date{
+.summary-h5, .summary-date, .summary-pretax-money-amount{
     font-size: 16px;
     font-weight: 700;
     color: #00122c;
+}
+.summary-pretax-money-amount{
+    font-size: 14px;
+    font-weight: 500;
+
 }
 
 .summary-money-amount{

@@ -12,22 +12,36 @@ const oauth2Client = new google.auth.OAuth2(
 function generateState() {
   return crypto.randomBytes(16).toString('hex');
 }
-// Redirect users to Google OAuth2 consent screen
-exports.googleOAuth2ConsentScreen = (req, res) => {
+
+exports.googleOAuth2ConsentScreen = async (req, res) => {
   const state = generateState();
+  // OPTIONAL: stash state for CSRF protection
+  // req.session.oauthState = state;
+
+  // If you can identify the user before auth (e.g., existing session),
+  // check whether they already have a refresh token:
+  const googleId = req.session?.googleId;
+  let hasRefresh = false;
+  if (googleId) {
+    const existing = await User.findOne({ googleId }, { refreshToken: 1 });
+    hasRefresh = !!existing?.refreshToken;
+  }
 
   const url = oauth2Client.generateAuthUrl({
-    access_type: "offline",
+    access_type: "offline",                     // Required for refresh_token
+    include_granted_scopes: true,
     scope: [
       "https://www.googleapis.com/auth/userinfo.profile",
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/calendar.readonly",
     ],
-    prompt: "none",
-    include_granted_scopes: true,
-    redirect_uri: process.env.GOOGLE_REDIRECT_URL // Make sure this matches your registered redirect URI
-
+    // If user already granted and we have refresh, try silent;
+    // otherwise FORCE consent so Google issues/returns refresh_token.
+    prompt: hasRefresh ? "none" : "consent",
+    redirect_uri: process.env.GOOGLE_REDIRECT_URL,
+    state,
   });
+
   res.redirect(url);
 };
 

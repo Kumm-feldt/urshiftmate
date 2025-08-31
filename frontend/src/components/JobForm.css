@@ -1,5 +1,5 @@
 
-form{
+.jobform-form{
     margin: 50px auto;
     margin-bottom: 100px;
     width: auto;
@@ -8,6 +8,8 @@ form{
     padding: 10px 25px;
     border-radius: 10px;
 }
+
+
 .div-wrapper{
     display: flex;
     flex-direction: row;

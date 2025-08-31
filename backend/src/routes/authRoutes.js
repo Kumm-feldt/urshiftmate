@@ -9,7 +9,6 @@ router.get("/logout", logout);
 
 
 router.get("/status", (req, res) => {
-  console.log("hello")
   if (req.session?.isAuthenticated) {
 
     return res.json({ isAuthenticated: true, user: req.session.userId });

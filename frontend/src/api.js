@@ -1,6 +1,11 @@
 const API = "http://localhost:8000/google/api"
 const CRUD_API = "http://localhost:8000/user/config"
 const AUTH_API = "http://localhost:8000/auth"
+const API_BASE = "http://localhost:8000"
+
+
+
+
 
 
 /*
@@ -25,7 +30,7 @@ function authHeader() {
 }
 */
 
-// ---------------------------
+// ---------------AUTH HELPER------------
 
 export async function ensureAuth() {
   try {
@@ -45,6 +50,23 @@ export async function ensureAuth() {
   }
 }
 
+export async function logout() {
+  try {
+    const response = await fetch(`${API_BASE}/logout`, {
+      credentials: "include",
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return {logout: true}
+    }
+  } catch (e) {
+    console.error('Auth check failed:', e);
+    return { isAuthenticated: false };
+  }
+}
+// ---------------------------------------
+
 function formatDate(inputDate){
     const date = new Date(inputDate);
 
@@ -57,7 +79,6 @@ function formatDate(inputDate){
     return formatted;
 }
 
-
 function formatDateWeek(isoDate, locale = "en-US"){
 
   const [y, m, d] = isoDate.split("-").map(Number);
@@ -67,22 +88,32 @@ function formatDateWeek(isoDate, locale = "en-US"){
 }
 
 export async function fetchDetailedEvents (index){
-
   try {
     const response = await fetch(`${API}/detailedEvents?index=${index}`, {
       credentials: "include",
     });
 
-    if(response.ok){
-        return response.json();
-    }else{
-        console.log(response.json());
+    const data = await response.json().catch(()=>null)
+
+    if(!response.ok){
+      const msg =
+        data?.error?.message ||
+        data?.message ||
+        response.statusText ||
+        "Request failed";
+      const err = new Error(msg);
+      err.status = response.status;
+      err.body = data;
+      throw err;
     }
+    return data
 
-
-  } catch (error) {
-    console.error("Error fetching events:", error);
-  }
+  } catch (networkErr) {
+    // Network / CORS / DNS / offline
+    const err = new Error("Network error while fetching events");
+    err.cause = networkErr;
+    err.status = 0;
+    throw err;  }
 }
 
 export async function fetchSummarizedEvents (index) {
@@ -91,18 +122,28 @@ export async function fetchSummarizedEvents (index) {
         credentials: "include",
       });
 
-        if(response.ok){
+    const data = await response.json().catch(()=>null)
 
-            return response.json();
-        }else{
-                console.log(response.json());
-        }
-
-
-    } catch (error) {
-      console.error("Error fetching events:", error);
+    if(!response.ok){
+      const msg =
+        data?.error?.message ||
+        data?.message ||
+        response.statusText ||
+        "Request failed";
+      const err = new Error(msg);
+      err.status = response.status;
+      err.body = data;
+      throw err;
     }
-};
+    return data
+
+  } catch (networkErr) {
+    // Network / CORS / DNS / offline
+    const err = new Error("Network error while fetching events");
+    err.cause = networkErr;
+    err.status = 0;
+    throw err;  }
+}
 
 export async function fetchUserSummary (index) {
     try {
@@ -110,25 +151,73 @@ export async function fetchUserSummary (index) {
         credentials: "include",
       });
  
-        if(response.ok){
-            const data = await response.json();
+    const data = await response.json().catch(()=>null)
 
-            data.checkDay = formatDate(data.checkDay);
-            data.startWeekOne = formatDateWeek(data.startWeekOne);
+    if(!response.ok){
 
-            data.endWeekOne = formatDateWeek(data.endWeekOne);
-            data.startWeekTwo = formatDateWeek(data.startWeekTwo);
-            data.endWeekTwo = formatDateWeek(data.endWeekTwo);
-            return data;
-        }else{
-            console.log(response.json());
-        }
+      const msg =
+        data?.error?.message ||
+        data?.message ||
+        response.statusText ||
+        "Request failed";
+      const err = new Error(msg);
+      err.status = response.status;
+      err.body = data;
+      throw err;
+    }else{
+      data.checkDay = formatDate(data.checkDay);
+      data.startWeekOne = formatDateWeek(data.startWeekOne);
 
-
-    } catch (error) {
-      console.error("Error fetching events:", error);
+      data.endWeekOne = formatDateWeek(data.endWeekOne);
+      data.startWeekTwo = formatDateWeek(data.startWeekTwo);
+      data.endWeekTwo = formatDateWeek(data.endWeekTwo);
     }
-};
+    return data
+
+  } catch (networkErr) {
+    // Network / CORS / DNS / offline
+    const err = new Error("Network error while fetching events");
+    err.cause = networkErr;
+    err.status = 0;
+    throw err;  }
+}
+
+export async function fetchUserInfo (index) {
+    try {
+      const response = await fetch(`${API}/user/info?index=${index}`, {
+        credentials: "include",
+      });
+ 
+    const data = await response.json().catch(()=>null)
+
+    if(!response.ok){
+      const msg =
+        data?.error?.message ||
+        data?.message ||
+        response.statusText ||
+        "Request failed";
+      const err = new Error(msg);
+      err.status = response.status;
+      err.body = data;
+      throw err;
+    }else{
+      data.checkDay = formatDate(data.checkDay);
+      data.startWeekOne = formatDateWeek(data.startWeekOne);
+
+      data.endWeekOne = formatDateWeek(data.endWeekOne);
+      data.startWeekTwo = formatDateWeek(data.startWeekTwo);
+      data.endWeekTwo = formatDateWeek(data.endWeekTwo);
+    }
+    return data
+
+  } catch (networkErr) {
+    // Network / CORS / DNS / offline
+    const err = new Error("Network error while fetching events");
+    err.cause = networkErr;
+    err.status = 0;
+    throw err;  }
+}
+
 
 export async function insertWorkplace (workplace, wage) {
   try {
@@ -156,6 +245,7 @@ export async function insertWorkplace (workplace, wage) {
 
 export async function toggleCalendar(calendarId, summary, active, primary){
   // delete calendar
+
   if(active){
     try {
           const res = await fetch(`${CRUD_API}/calendars/delete`, {
@@ -165,6 +255,8 @@ export async function toggleCalendar(calendarId, summary, active, primary){
               calendarId : calendarId,
               primary: primary
             }),
+              headers: { "Content-Type": "application/json" }, // ✅ important
+
 
           });
 
@@ -184,15 +276,14 @@ export async function toggleCalendar(calendarId, summary, active, primary){
     try {
       const res = await fetch(`${CRUD_API}/calendars/add`, {
         credentials: "include", 
-        method: "POST", 
+        method: "PUT", 
         body: JSON.stringify({
             calendarId : calendarId,
             summary : summary
         }),
-
+          headers: { "Content-Type": "application/json" }, // ✅ important
 
       });
-
       if (res.ok) {
         const data = await res.json();
         return data;
@@ -209,20 +300,31 @@ export async function toggleCalendar(calendarId, summary, active, primary){
 
 export async function fetchWorkplaces() {
   try {
-    const res = await fetch(`${CRUD_API}/workplace`, {
+    const response = await fetch(`${CRUD_API}/workplace`, {
       credentials: "include"
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      return data;
-    } else {
-      const error = await res.json(); // wait for the JSON before logging
-      console.error("Error fetching workplaces:", error);
+    const data = await response.json().catch(()=>null)
+
+    if(!response.ok){
+      const msg =
+        data?.error?.message ||
+        data?.message ||
+        response.statusText ||
+        "Request failed";
+      const err = new Error(msg);
+      err.status = response.status;
+      err.body = data;
+      throw err;
     }
-  } catch (err) {
-    console.error("Network error fetching workplaces:", err);
-  }
+    return data
+
+  } catch (networkErr) {
+    // Network / CORS / DNS / offline
+    const err = new Error("Network error while fetching events");
+    err.cause = networkErr;
+    err.status = 0;
+    throw err;  }
 }
 
 
@@ -234,60 +336,97 @@ export async function getSessionUserId() {
   return data.userId;
 }
 
+export async function calendarExists() {
+  const res = await fetch(`${API}/existCalendars`, {
+    credentials: "include" 
+  });
+  const data = await res.json();
+  return data.calendarExists;
+}
+
 
 export async function fetchCalendars(){
   try {
-    const res = await fetch(`${CRUD_API}/calendars`, {
+    const response = await fetch(`${CRUD_API}/calendars`, {
       credentials: "include"
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      return data;
-    } else {
-      const error = await res.json(); // wait for the JSON before logging
-      console.error("Error fetching calendars:", error);
+    const data = await response.json().catch(()=>null)
+
+    if(!response.ok){
+      const msg =
+        data?.error?.message ||
+        data?.message ||
+        response.statusText ||
+        "Request failed";
+      const err = new Error(msg);
+      err.status = response.status;
+      err.body = data;
+      throw err;
     }
-  } catch (err) {
-    console.error("Network error fetching workplaces:", err);
-  }
+    return data
+
+  } catch (networkErr) {
+    // Network / CORS / DNS / offline
+    const err = new Error("Network error while fetching events");
+    err.cause = networkErr;
+    err.status = 0;
+    throw err;  }
 }
 
 export async function fetchActiveCalendars(){
   try{
-      const res = await fetch(`${CRUD_API}/calendars/active`,{
+      const response = await fetch(`${CRUD_API}/calendars/active`,{
         credentials:"include"
       });
 
-      if(res.ok){
-        const data = await res.json()
-        return data;
-      }else{
-        const error = await res.json()
-        console.error("Problem fetching active calendars: ", error)
-      }
+    const data = await response.json().catch(()=>null)
 
+    if(!response.ok){
+      const msg =
+        data?.error?.message ||
+        data?.message ||
+        response.statusText ||
+        "Request failed";
+      const err = new Error(msg);
+      err.status = response.status;
+      err.body = data;
+      throw err;
+    }
+    return data
 
-  }catch(err){
-    console.log("Error fetching active calendars")
-  }
+  } catch (networkErr) {
+    // Network / CORS / DNS / offline
+    const err = new Error("Network error while fetching events");
+    err.cause = networkErr;
+    err.status = 0;
+    throw err;  }
 }
 
 export async function randomPhrase(type){
   try{
-    const res = await fetch(`${CRUD_API}/randomPhrase?phraseType=${type}`, {
+    const response = await fetch(`${CRUD_API}/randomPhrase?phraseType=${type}`, {
         credentials:"include"
       })
-    if(res.ok){
-        const data = await res.json()
-        return data;
-      }else{
-        const error = await res.json()
-        console.error("Problem fetching random phrase: ", error)
-      }
-      
-  }catch(err){
-        console.error("Problem fetching random phrase: ", err)
+    const data = await response.json().catch(()=>null)
 
-  }
+    if(!response.ok){
+      const msg =
+        data?.error?.message ||
+        data?.message ||
+        response.statusText ||
+        "Request failed";
+      const err = new Error(msg);
+      err.status = response.status;
+      err.body = data;
+      throw err;
+    }
+    return data
+
+  } catch (networkErr) {
+    // Network / CORS / DNS / offline
+    const err = new Error("Network error while fetching events");
+    err.cause = networkErr;
+    err.status = 0;
+    throw err;  }
 }

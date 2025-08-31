@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Table from  "./Table"
 import "./Dashboard.css"
-import "./Sidebar"
 import Sidebar from "./Sidebar";
-import Summary from "./Summary"
+import Summary from "./Summary";
+import { AuthContext } from "../AuthContext";
+
 
 import * as api from "../api.js"
 import { ThreeDot } from "react-loading-indicators";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 function toggleBar(e) {
   document.querySelectorAll(".dashboard-toggle").forEach(btn =>
@@ -39,6 +41,23 @@ function formatPhrase(phrase, values) {
 
 
 const Dashboard = ({showSidebar = true}) => {
+// 1) check status
+      const { auth, setAuth } = useContext(AuthContext);
+  
+  useEffect(() => {
+    fetch(`${API_URL}/auth/status`, { credentials: "include" }) // Fetch session status
+      .then((res) => res.json())
+      .then((data) => {
+          setAuth(data)
+          setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching auth status:", error)
+        setLoading(false)
+      });
+  }, []);
+
+
   const [detEvents, setDetailedEvents] = useState([]);
   const [summEvents, setSummarizedEvents] = useState([]);
   const [userInfo, setUserInfo] = useState();
@@ -46,30 +65,55 @@ const Dashboard = ({showSidebar = true}) => {
   const [type, setType] = useState("");
   const [calendarIndex, setCalendarIndex] = useState(0)
   const [loading, setLoading] = useState(true); // <- drives the spinner
-
+  const [errorMsg, setErrorMsg] = useState("");
+  const [calendarExists, setCalendarExists] = useState(false)
+  const [userGenInfo, setUserGenInfo] = useState("")
   const header = ["Job", "Wage", "Hours Worked", "Total"];
   const headerDetailed = ["Job", "Date", "Start Time","End Time",  "Hours Worked"];
 
 
+  const mapStatusToMsg = (e) => {
+    if (!e || typeof e !== "object") return "Something went wrong. Please try again later.";
+    if (e.status === 401) return "Please connect your Google account to continue.";
+    if (e.status === 400) return "Missing or invalid parameters. Please try again.";
+    if (e.status === 404) return "No events found for the selected dates.";
+    if (e.status === 0)   return "You're offline or the server is unreachable.";
+    return e.message || "Something went wrong. Please try again later.";
+  };
+
   // Function to fetch all data
   const fetchData = async (index) => {
     setLoading(true);
+    setErrorMsg("");
     try {
+      
       const [detailed, summarized, user] = await Promise.all([
         api.fetchDetailedEvents(index),
         api.fetchSummarizedEvents(index),
         api.fetchUserSummary(index)
       ]);
-      
       setDetailedEvents(detailed || []);
       setUserInfo(user || null);
       await setSummarizedEventsHelper(summarized || [], user);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    } catch (e) {
+      setErrorMsg(mapStatusToMsg(e));
     } finally {
       setLoading(false);
     }
   };
+
+
+  const fetchUInfo = async (index) => {
+    const userGenInfo = await api.fetchUserInfo(calendarIndex);
+    setUserGenInfo(userGenInfo)
+  }
+
+  const existsCal = async () => {
+    const exists = await api.calendarExists();
+    setCalendarExists(exists);  
+   return (exists) ? true : false;
+  }
+
 
   // Initial data fetch on component mount
   useEffect(() => {
@@ -81,14 +125,26 @@ const Dashboard = ({showSidebar = true}) => {
 
       if (!auth.isAuthenticated) {
         if (!alive) return;
-        console.log("bro not authentificated")
-        //window.location.replace("/login");
-        //return;
+        window.location.replace("/login");
+        return;
       }
-      // 2) fetch in parallel
-      if(alive){
-        await fetchData(calendarIndex)
-      }
+    // 2) check calendars
+    const exists = await existsCal();
+    if (!alive) return;
+
+
+    // 3) fetch General User Info
+    await fetchUInfo(calendarIndex)
+
+    // 4) only fetch if calendars exist
+    if (exists) {
+      await fetchData(calendarIndex);
+    } else {
+      setDetailedEvents([]);
+      setSummarizedEvents([]);
+      setUserInfo(null);
+    }
+    setLoading(false)
 
     })();
 
@@ -96,32 +152,38 @@ const Dashboard = ({showSidebar = true}) => {
   }, []);
 
   // Watch for calendarIndex changes and refetch data
-  useEffect(()=>{
-    if(calendarIndex != 0 || userInfo){
-      fetchData(calendarIndex)
-    }
-  }, [calendarIndex])
+  useEffect(() => {
+    (async () => {
+      if (calendarIndex !== 0 || userInfo) {
+        const exists = await existsCal();
+        
+        if (exists) {
+          await fetchData(calendarIndex);
+        }
+        await fetchUInfo(calendarIndex);
+      }
+    })();
+  }, [calendarIndex]);
 
 
   // Show loading on initial load only
-  if (loading && !userInfo) return <div className="loading"><ThreeDot color="#070c22ff" size="medium" text="" textColor="" /></div>;
-  if (!userInfo && !loading) return null; // defensive; we redirect if unauth
+  if (loading) return <div className="loading"><ThreeDot color="#070c22ff" size="medium" text="" textColor="" /></div>;
 
 
 
-const moneyAmount = (userInfo.paycheck || 0).toFixed(2);
-const checkDay = userInfo.checkDay || 0;
 
-const startWeekOne = userInfo.startWeekOne || 0;
-const endWeekOne = userInfo.endWeekOne || 0;
-const startWeekTwo = userInfo.startWeekTwo || 0;
-const endWeekTwo = userInfo.endWeekTwo || 0;
-const taxedPaycheck = userInfo.taxedPaycheck || 0;
+const preTaxMoneyAmount = userInfo?.paycheck || 0;
+const checkDay = userGenInfo?.checkDay || 0;
+
+const startWeekOne = userGenInfo?.startWeekOne || 0;
+const endWeekOne = userGenInfo?.endWeekOne || 0;
+const startWeekTwo = userGenInfo?.startWeekTwo || 0;
+const endWeekTwo = userGenInfo?.endWeekTwo || 0;
+const taxedPaycheck = userInfo?.taxedPaycheck || 0;
 
 
     async function setSummarizedEventsHelper(data, user){
         let amount = Number(user?.paycheck || 0);
-        console.log("Amount: ", amount)
         const localType = amount < 100 ? "negative" : "positive";
 
         setType(localType)
@@ -140,17 +202,25 @@ const taxedPaycheck = userInfo.taxedPaycheck || 0;
 
 
 
-const formattedPhrase = formatPhrase(phrase, {
-  name: userInfo?.username,
-  hours: userInfo?.totalHours,
-  payDate: userInfo?.taxedPaycheck, 
-  earnings: `$${userInfo?.paycheck}`,
+let formattedPhrase;
+if(userInfo){
+ formattedPhrase= formatPhrase(phrase, {
+  name: userGenInfo?.username || "sir",
+  hours: userInfo?.totalHours || 0,
+  payDate: userInfo?.checkDay || Date.now(), 
+  earnings: `$${userInfo?.taxedPaycheck}` || 0,
   goalHours: 40
 });
+}
 
 
   return (
+
     <div>
+      
+
+     
+
       {showSidebar && <Sidebar></Sidebar>}
           {/* Google Calendar Events */}
 
@@ -163,7 +233,7 @@ const formattedPhrase = formatPhrase(phrase, {
           }} className="w-[44px] h-[44px] text-gray-800 arrow-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 12h14M5 12l4-4m-4 4 4 4"/>
               </svg>
-              <Summary date={checkDay} moneyAmount={taxedPaycheck}></Summary>
+              <Summary date={checkDay} moneyAmount={taxedPaycheck} preTaxMoneyAmount={preTaxMoneyAmount}></Summary>
               <svg onClick={() => {
             setCalendarIndex(calendarIndex+1)
           }} className="w-[44px] h-[44px] text-gray-800 arrow-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
