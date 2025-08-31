@@ -41,7 +41,7 @@ app.use(session({
 
 // Configure CORS to allow requests from frontend (React)
 app.use(cors({
-  origin: "http://localhost:3000",  // Allow frontend origin
+  origin: "https://urshiftmate.onrender.com",  // Allow frontend origin
   credentials: true,  // Allow cookies/session sharing
 }));
 
