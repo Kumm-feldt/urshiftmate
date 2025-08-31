@@ -1,10 +1,16 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-function connect({host, db, user, pass}){
-    return mongoose.connect(
-        `mongodb://${host}/${db}`,
-        {user, pass}
-    )
+dotenv.config();
+
+function connect() {
+  const uri = process.env.MONGODB_URI; // full URI from Atlas or Render
+  return mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB connected!"))
+  .catch(err => console.error("MongoDB connection error:", err));
 }
 
-module.exports = {connect}
+export { connect };
