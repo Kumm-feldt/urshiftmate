@@ -3,7 +3,7 @@ const session = require("express-session");
 const cors = require("cors");
 require('dotenv').config();
 const path = require("path");
-
+const path = require('path');
 
 const authRoutes = require("./routes/authRoutes");
 const googleRoutes = require("./routes/googleRoutes");
@@ -41,12 +41,22 @@ app.use(session({
 
 // Configure CORS to allow requests from frontend (React)
 app.use(cors({
-  origin: "https://www.urshiftmate.com",   // Production frontend
+  origin: ["https://www.urshiftmate.com", "https://urshiftmate.com"],   // Production frontend
   credentials: true,  // Allow cookies/session sharing
 }));
 
 
 app.use("/auth", authRoutes);
+
+// Serve static files from the React build
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Catch-all: send all other requests to React's index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+
 app.use("/google", googleRoutes);
 app.use("/user/config", userConfigRoutes);
 app.use("/logout", logout);
