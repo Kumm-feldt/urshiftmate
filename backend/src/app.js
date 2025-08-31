@@ -3,7 +3,6 @@ const session = require("express-session");
 const cors = require("cors");
 require('dotenv').config();
 const path = require("path");
-const path = require('path');
 
 const authRoutes = require("./routes/authRoutes");
 const googleRoutes = require("./routes/googleRoutes");
