@@ -1,7 +1,6 @@
-import mongoose from "mongoose";
-import dotenv from "dotenv";
+const mongoose = require('mongoose');
+require('dotenv').config();;
 
-dotenv.config();
 
 function connect() {
   const uri = process.env.MONGODB_URI; // full URI from Atlas or Render
