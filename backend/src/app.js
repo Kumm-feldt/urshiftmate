@@ -31,9 +31,9 @@ app.use(session({
     ttl: 60 * 60 * 24 * 14,    // 14 days; adjust as needed
   }),
   cookie: {
-    secure: false, 
+    secure: true,  // true ig using https
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "none", // 'lax' when using locally
     maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days
 
   },
@@ -41,7 +41,7 @@ app.use(session({
 
 // Configure CORS to allow requests from frontend (React)
 app.use(cors({
-  origin:   "https://www.urshiftmate.com",   // Production frontend
+  origin:   ["https://urshiftmate.com", "https://www.urshiftmate.com"],   // Production frontend
   credentials: true,  // Allow cookies/session sharing
 }));
 

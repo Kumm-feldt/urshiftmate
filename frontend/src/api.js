@@ -1,4 +1,4 @@
-const API_BASE = "https://urshiftmate.onrender.com"
+const API_BASE = "https://urshiftmate.onrender.com";
 
 const API = `${API_BASE}/google/api`
 const CRUD_API = `${API_BASE}/user/config`
