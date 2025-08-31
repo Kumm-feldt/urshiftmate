@@ -88,7 +88,7 @@ exports.oAuth2CallbackHandler = async (req, res) => {
     req.session.googleId = googleId;
     req.session.isAuthenticated = true;
 
-  res.redirect("http://www.urshiftmate.com/dashboard");
+  res.redirect("https://www.urshiftmate.com/dashboard");
 
 } catch (error) {
     console.error("OAuth callback error:", error);
@@ -104,7 +104,7 @@ exports.logout = (req, res) => {
       console.error("Error destroying session:", err);
       return res.status(500).send("Error logging out");
     }
-    res.redirect("http://www.urshiftmate.com/login");
+    res.redirect("https://www.urshiftmate.com/login");
 
   });
 };
