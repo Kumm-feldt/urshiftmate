@@ -1,7 +1,8 @@
-const API = "http://localhost:8000/google/api"
-const CRUD_API = "http://localhost:8000/user/config"
-const AUTH_API = "http://localhost:8000/auth"
-const API_BASE = "http://localhost:8000"
+const API_BASE = "https://urshiftmate.onrender.com"
+
+const API = `${API_BASE}/google/api`
+const CRUD_API = `${API_BASE}/user/config`
+const AUTH_API = `${API_BASE}/auth`
 
 
 
@@ -329,7 +330,7 @@ export async function fetchWorkplaces() {
 
 
 export async function getSessionUserId() {
-  const res = await fetch("http://localhost:8000/user/session", {
+  const res = await fetch(`${API_BASE}/user/session`, {
     credentials: "include" 
   });
   const data = await res.json();

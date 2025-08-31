@@ -8,7 +8,7 @@ import { AuthContext } from "../AuthContext";
 
 import * as api from "../api.js"
 import { ThreeDot } from "react-loading-indicators";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function toggleBar(e) {
   document.querySelectorAll(".dashboard-toggle").forEach(btn =>

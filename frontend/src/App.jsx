@@ -10,7 +10,7 @@ import { AuthContext } from "./AuthContext";
 
 
 // Use correct environment variable format
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const App = () => {
   const [auth, setAuth] = useState({ isAuthenticated: false, user: null });
