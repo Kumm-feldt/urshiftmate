@@ -12,4 +12,4 @@ function connect() {
   .catch(err => console.error("MongoDB connection error:", err));
 }
 
-export { connect };
+module.exports = { connect };
