@@ -475,7 +475,6 @@ async function dataCollector(req, res, next){
         // obtain a list of events from the active calendars (in DB) and according to the week prompted
         const firstWeekEvents = await getEvents( googleId, dateObject, "first"); // <-------------- check
         const secondWeekEvents = await getEvents( googleId, dateObject, "second");
-        console.log(secondWeekEvents)
 
 
         if (!firstWeekEvents && !secondWeekEvents) {

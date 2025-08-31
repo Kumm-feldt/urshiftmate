@@ -14,7 +14,7 @@ export default function CalendarElement({ calendarData}){
 
     // function to activate or not the calendar
     async function handleToggleCalendar(){
-        console.log(calendar)
+
         await api.toggleCalendar(calendarId, calendar, active, primary);
         setActive(!active)
     }
