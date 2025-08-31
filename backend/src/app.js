@@ -47,13 +47,6 @@ app.use(cors({
 
 app.use("/auth", authRoutes);
 
-// Serve static files from the React build
-app.use(express.static(path.join(__dirname, 'build')));
-
-// Catch-all: send all other requests to React's index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
 
 
 app.use("/google", googleRoutes);
@@ -85,6 +78,14 @@ app.use((err, req, res, next) => {
 // Endpoint to get session userId
 app.get("/user/session", (req, res) => {
   res.json({ userId: req.session.googleId || null });
+});
+
+// Serve static files from the Vite build
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Catch-all: send all other requests to React's index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 module.exports = app;
