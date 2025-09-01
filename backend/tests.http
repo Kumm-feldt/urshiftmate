@@ -1,4 +1,4 @@
-@url = http://localhost:8000
+@url = https://urshiftmate.onrender.com/auth/status
 
 
 
@@ -14,7 +14,7 @@ Content-Type: application/json
 }
 
 ###
-GET {{url}}/google/summaryEvents
+GET {{url}}
 
 ###
 GET {{url}}/auth/status

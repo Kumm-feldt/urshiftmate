@@ -40,7 +40,8 @@ app.use(session({
 
 // Configure CORS to allow requests from frontend (React)
 app.use(cors({
-  origin: ["https://www.urshiftmate.com", "https://urshiftmate.com"],   // Production frontend
+  origin: ["https://www.urshiftmate.com", "https://urshiftmate.com",     "https://urshiftmate.vercel.app"
+],   // Production frontend
   credentials: true,  // Allow cookies/session sharing
 }));
 
