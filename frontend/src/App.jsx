@@ -6,7 +6,7 @@ import Settings from "./components/Settings";
 import Profile from "./components/Profile";
 import AuthSuccess from "./components/AuthSuccess";
 import JobsCalendar from "./components/JobsCalendar";
-
+import Policy from "./components/Policy"
 import { AuthContext } from "./AuthContext";
 
 
@@ -50,6 +50,8 @@ const App = () => {
     <AuthContext.Provider value={{ auth, setAuth }}>
     <Router>
       <Routes>
+        <Route path="/privacy-policy" element={<Policy />} />
+
         <Route path="/auth-success" element={<AuthSuccess />} />
 
         <Route path="/login" element={auth.isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
