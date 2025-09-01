@@ -81,11 +81,6 @@ app.get("/user/session", (req, res) => {
 });
 
 // Serve static files from the Vite build
-app.use(express.static(path.join(__dirname, '../dist')));
-
-// Catch-all: send all other requests to React's index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
-});
+app.use(express.static(config.staticDir));
 
 module.exports = app;

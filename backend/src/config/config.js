@@ -27,13 +27,11 @@ module.exports = {
 
     httpPort: 8000,
 
-    staticDir: projectPath('static'),
+    staticDir: projectPath('dist'),
     sessionSecret: 'bunnyslippers',
     dbInfo: {
         host: 'localhost', 
         db: 'test-urshiftmate'
     
     }
-
-   
 };
