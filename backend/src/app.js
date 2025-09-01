@@ -19,23 +19,29 @@ const { logout } = require("./controllers/authController.js");
 const FileStore = sessionFileStore(expressSession)
 
 
+const cookieParser = require('cookie-parser');
+
 
 app.use(express.json());
+app.use(cookieParser());
+// Add this import at the top
+const MongoStore = require('connect-mongo');
+
+// Replace your entire session configuration with this:
 app.use(session({
   name: "sc.sid",
   secret: config.sessionSecret,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI
+    mongoUrl: process.env.MONGODB_URI,
+    touchAfter: 24 * 3600 // lazy session update
   }),
   cookie: {
     secure: true,
     httpOnly: true,
     sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 14,
-
-
+    maxAge: 1000 * 60 * 60 * 24 * 14
   },
 }));
 
