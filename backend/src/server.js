@@ -11,19 +11,28 @@ const db = require('./db.js')
 const server = http.createServer(app);
 
 
-// Call it the same way, but only pass config when in dev
 
-    db.connect(config.dbInfo)
-    .then(()=>{
-        logger.info("Database connected")
-        // start the server
-        server.listen(config.httpPort, ()=>{ // function called once the server is running
-        logger.info(`Server listening on port ${config.httpPort}`);
-
+// Call it the same way, but only pass config in dev
+if (process.env.MODE === "dev") {
+  db.connect(config.dbInfo)
+    .then(() => {
+      logger.info("Database connected (dev)");
+      server.listen(config.PORT, () => {
+        logger.info(`Server listening on port ${config.PORT}`);
+      });
     })
+    .catch((err) => {
+      logger.error("Database connection failed", err);
+    });
+} else {
+  db.connect()
+    .then(() => {
+      logger.info("Database connected (prod)");
+      server.listen(config.PORT, () => {
+        logger.info(`Server listening on port ${config.PORT}`);
+      });
     })
-    .catch(err=>{
-        logger.error(err)
-
-    })
-
+    .catch((err) => {
+      logger.error("Database connection failed", err);
+    });
+}

@@ -15,7 +15,7 @@ let logLevel = 'info';
 if (process.env.LOG_LEVEL) {
     logLevel = process.env.LOG_LEVEL.toLowerCase();
 }
-
+const httpPort = process.env.PORT || config.httpPort || 8000;
 
 // Configuration information
 module.exports = {
@@ -25,7 +25,7 @@ module.exports = {
 
     logLevel,
 
-    httpPort: 8000,
+    PORT: httpPort,
 
     staticDir: projectPath('dist'),
     sessionSecret: 'bunnyslippers',
