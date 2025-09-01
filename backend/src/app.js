@@ -33,13 +33,18 @@ app.use(session({
     secure: true,
     httpOnly: true,
     sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 14
+    maxAge: 1000 * 60 * 60 * 24 * 14,
+    domain: ".urshiftmate.com"  // Add this line
+
   },
 }));
 
 // Configure CORS to allow requests from frontend (React)
 app.use(cors({
-  origin: ["https://www.urshiftmate.com", "https://urshiftmate.com",     "https://urshiftmate.vercel.app"
+  origin: [
+    "https://urshiftmate.com",      // Remove www version
+    "https://www.urshiftmate.com",  // Keep www version
+    "https://urshiftmate.vercel.app"
 ],   // Production frontend
   credentials: true,  // Allow cookies/session sharing
 }));
