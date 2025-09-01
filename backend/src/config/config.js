@@ -15,7 +15,7 @@ let logLevel = 'info';
 if (process.env.LOG_LEVEL) {
     logLevel = process.env.LOG_LEVEL.toLowerCase();
 }
-const httpPort = process.env.PORT || config.httpPort || 8000;
+const httpPort = process.env.PORT  || 8000;
 
 // Configuration information
 module.exports = {

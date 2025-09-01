@@ -259,15 +259,14 @@ export async function toggleCalendar(calendarId, summary, active, primary){
     try {
           const res = await fetch(`${CRUD_API}/calendars/delete`, {
                   credentials: "include",
-      headers: {
-        ...authHeaders()
-      } ,
             method: "PUT", 
             body: JSON.stringify({
               calendarId : calendarId,
               primary: primary
             }),
-              headers: { "Content-Type": "application/json" }, // ✅ important
+              headers: { "Content-Type": "application/json", 
+                ...authHeaders()
+               }, // ✅ important
 
 
           });
@@ -288,15 +287,15 @@ export async function toggleCalendar(calendarId, summary, active, primary){
     try {
       const res = await fetch(`${CRUD_API}/calendars/add`, {
               credentials: "include",
-      headers: {
-        ...authHeaders()
-      } ,
         method: "PUT", 
         body: JSON.stringify({
             calendarId : calendarId,
             summary : summary
         }),
-          headers: { "Content-Type": "application/json" }, // ✅ important
+          headers: { "Content-Type": "application/json" ,
+             ...authHeaders()}, // ✅ important
+       
+
 
       });
       if (res.ok) {

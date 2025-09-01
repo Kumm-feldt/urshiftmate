@@ -1,4 +1,4 @@
-@url = https://urshiftmate.onrender.com/auth/status
+@url = https://urshiftmate.onrender.com/user/config
 
 
 
@@ -17,7 +17,7 @@ Content-Type: application/json
 GET {{url}}
 
 ###
-GET {{url}}/auth/status
+GET {{url}}/create/setup
 
 
 ###
