@@ -25,5 +25,24 @@ router.get("/status", (req, res) => {
   return res.status(401).json({ isAuthenticated: false });
 });
 
+// ++++++++++++++++++++++ test ++++++++++++++++++++++
+router.get("/cookie-test", (req, res) => {
+  // Set a simple cookie
+  res.cookie('test-cookie', 'test-value', {
+    httpOnly: false,  // Allow JavaScript to read it for testing
+    secure: true,
+    sameSite: 'none',
+    maxAge: 1000 * 60 * 60
+  });
+  
+  res.json({ message: 'Cookie set' });
+});
 
+router.get("/cookie-check", (req, res) => {
+  console.log("All cookies:", req.cookies);
+  res.json({ 
+    cookies: req.cookies,
+    testCookie: req.cookies['test-cookie']
+  });
+});
 module.exports = router;

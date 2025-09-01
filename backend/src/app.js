@@ -34,7 +34,7 @@ app.use(session({
     httpOnly: true,
     sameSite: "none",
     maxAge: 1000 * 60 * 60 * 24 * 14,
-    domain: ".urshiftmate.com"  // Add this line
+
 
   },
 }));
