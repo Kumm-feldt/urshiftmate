@@ -85,15 +85,22 @@ exports.oAuth2CallbackHandler = async (req, res) => {
     }
 
     // Set user session
+    console.log("Setting session data...");
     req.session.googleId = googleId;
     req.session.isAuthenticated = true;
-    // Save session before redirect
+    
+    console.log("Session before save:", req.session);
+    
+    // CRITICAL: Save session before redirect
     req.session.save((err) => {
       if (err) {
         console.error('Session save error:', err);
-        return res.status(500).send('Session error');
+        return res.status(500).send("Session save failed");
       }
-      res.redirect("https://urshiftmate.com/dashboard"); // Remove www
+      
+      console.log("Session saved! Redirecting...");
+      console.log("Final session state:", req.session);
+      res.redirect("https://urshiftmate.com/dashboard");
     });
 
 } catch (error) {
