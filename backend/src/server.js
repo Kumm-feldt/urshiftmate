@@ -12,7 +12,7 @@ const server = http.createServer(app);
 
 
 // Call it the same way, but only pass config when in dev
-if (process.env.MODE === "dev") {
+
     db.connect(config.dbInfo)
     .then(()=>{
         logger.info("Database connected")
@@ -26,6 +26,4 @@ if (process.env.MODE === "dev") {
         logger.error(err)
 
     })
-} else {
-  db.connect();
-}
+
