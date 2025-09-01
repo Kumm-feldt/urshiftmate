@@ -10,7 +10,7 @@ const LogoutButton =()=> {
 
   const handleLogout = async () => {
     try{
-      await api.logout(); // logout from backend & destroy sessions
+      localStorage.removeItem('authToken');
       setAuth({ isAuthenticated: false, user: null }) // clear local auth
       navigate("/login"); // redirect to login page after logout
     }catch(err){

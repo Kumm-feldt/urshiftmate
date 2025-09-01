@@ -43,7 +43,7 @@ export async function ensureAuth() {
 export async function logout() {
   try {
     const response = await fetch(`${API_BASE}/logout`, {
-            credentials: "include",
+      credentials: "include",
       headers: {
         ...authHeaders()
       }

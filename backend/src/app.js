@@ -10,11 +10,17 @@ const userConfigRoutes = require("./routes/crudRoutes.js")
 
 const config = require("./config/config")
 
-const cors_origins = process.env.CORS_LINK || [
-    "https://urshiftmate.com",      // Remove www version
-    "https://www.urshiftmate.com",  // Keep www version
-    "https://urshiftmate.vercel.app"
-]
+let cors_origins;
+if(process.env.MODE == "dev"){
+  cors_origins = process.env.CORS_LINK;
+}else{
+  cors_origins = [
+      "https://urshiftmate.com",      // Remove www version
+      "https://www.urshiftmate.com",  // Keep www version
+      "https://urshiftmate.vercel.app"
+  ]
+}
+
 
 const app = express();
 

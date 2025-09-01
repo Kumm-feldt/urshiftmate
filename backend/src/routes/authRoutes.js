@@ -1,5 +1,6 @@
 const express = require("express");
 const { googleOAuth2ConsentScreen, oAuth2CallbackHandler, logout } = require("../controllers/authController");
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -7,17 +8,6 @@ router.get("/google", googleOAuth2ConsentScreen);
 router.get("/google/callback", oAuth2CallbackHandler);
 router.get("/logout", logout);
 
-/*
-router.get("/status", (req, res) => {
-  if (req.userInfo?.isAuthenticated) {
-    return res.json({ 
-      isAuthenticated: true, 
-      user: req.userInfo.googleId 
-    });
-  }
-  return res.status(401).json({ isAuthenticated: false });
-});
-*/
 router.get("/verify-token", (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   

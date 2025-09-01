@@ -10,19 +10,22 @@ const db = require('./db.js')
 // Create the server
 const server = http.createServer(app);
 
-db.connect(config.dbInfo)
-.then(()=>{
-    logger.info("Database connected")
-    // start the server
-    server.listen(config.httpPort, ()=>{ // function called once the server is running
-    logger.info(`Server listening on port ${config.httpPort}`);
 
-})
-})
-.catch(err=>{
-    logger.error(err)
+// Call it the same way, but only pass config when in dev
+if (process.env.MODE === "dev") {
+    db.connect(config.dbInfo)
+    .then(()=>{
+        logger.info("Database connected")
+        // start the server
+        server.listen(config.httpPort, ()=>{ // function called once the server is running
+        logger.info(`Server listening on port ${config.httpPort}`);
 
-})
+    })
+    })
+    .catch(err=>{
+        logger.error(err)
 
-
-
+    })
+} else {
+  db.connect();
+}
