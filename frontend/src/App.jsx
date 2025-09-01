@@ -50,7 +50,7 @@ const App = () => {
     <AuthContext.Provider value={{ auth, setAuth }}>
     <Router>
       <Routes>
-        <Route path="/privacy-policy" element={<Policy />} />
+        <Route path="/policy" element={<Policy />} />
 
         <Route path="/auth-success" element={<AuthSuccess />} />
 
