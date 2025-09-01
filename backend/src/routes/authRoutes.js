@@ -9,8 +9,12 @@ router.get("/logout", logout);
 
 
 router.get("/status", (req, res) => {
+
+  console.log("Session:", req.session);
+  console.log("Cookies:", req.cookies);
+
   if (req.session?.isAuthenticated) {
-    return res.json({ isAuthenticated: true, user: req.session.userId });
+    return res.json({ isAuthenticated: true, user: req.session.googleId });
   }
   return res.status(401).json({ isAuthenticated: false });
 });

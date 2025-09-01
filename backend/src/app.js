@@ -3,6 +3,7 @@ const session = require("express-session");
 const cors = require("cors");
 require('dotenv').config();
 const path = require("path");
+const MongoStore = require('connect-mongo');
 
 const authRoutes = require("./routes/authRoutes");
 const googleRoutes = require("./routes/googleRoutes");
@@ -21,20 +22,18 @@ const FileStore = sessionFileStore(expressSession)
 
 app.use(express.json());
 app.use(session({
-    name: "sc.sid",                // new cookie name helps dodge stale cookies
+  name: "sc.sid",
   secret: config.sessionSecret,
   resave: false,
   saveUninitialized: false,
-  store: new FileStore({
-    retries: 0,               // stop noisy “will retry” logs
-    ttl: 60 * 60 * 24 * 14,    // 14 days; adjust as needed
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI
   }),
   cookie: {
-    secure: true,  // true ig using https
+    secure: true,
     httpOnly: true,
-    sameSite: "none", // 'lax' when using locally
-    maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days
-
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24 * 14
   },
 }));
 
