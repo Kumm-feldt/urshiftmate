@@ -23,9 +23,9 @@ export function requireAuth(req, res, next){
 }
 */
 exports.isAuthenticated = (req, res, next) => {
-    console.log("isAuthenticates: ---------- ", req.session.isAuthenticated)
+    console.log("isAuthenticates: ---------- ", req.userInfo.isAuthenticated)
 
-    if (req.session.isAuthenticated) { // Check session instead of cookies
+    if (req.userInfo.isAuthenticated) { // Check session instead of cookies
       return next();
     }
     res.redirect("/login"); // Redirect if not authenticated

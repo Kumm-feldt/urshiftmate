@@ -32,6 +32,5 @@ module.exports = {
     dbInfo: {
         host: 'localhost', 
         db: 'test-urshiftmate'
-    
     }
 };

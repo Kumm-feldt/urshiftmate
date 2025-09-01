@@ -15,7 +15,7 @@ const oauth2Client = new google.auth.OAuth2(
 async function checkUserExists(googleId){
     try{
         let userExists = await User.findOne({googleId });
-        return user ? user : false
+        return userExists ? userExists : false
     }catch(err){
         console.log(err)
     }
@@ -82,7 +82,7 @@ async function addWorkplace (req, res) {
 
 
 // =========== GOOGLE AUTH ==============
-
+/*
   // Redirect users to Google OAuth2 consent screen
 async function googleOAuth2ConsentScreen (req, res) {
     const url = oauth2Client.generateAuthUrl({
@@ -126,8 +126,8 @@ async function oAuth2CallbackHandler(req, res) {
       }
   
       // Set user info in session
-      req.session.googleId = googleId;
-      req.session.isAuthenticated = true;
+      req.userInfo.googleId = googleId;
+      req.userInfo.isAuthenticated = true;
   
       // Redirect to dashboard or home page
       res.redirect('/dashboard');
@@ -137,9 +137,12 @@ async function oAuth2CallbackHandler(req, res) {
     }
   }
   
+*/
+
+
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
-    if (req.session.isAuthenticated) {
+    if (req.userInfo.isAuthenticated) {
       return next();
     }
     res.redirect('/login');
@@ -151,7 +154,7 @@ function isAuthenticated(req, res, next) {
 // Fetch events from Google Calendar
 async function getEvents(req, res) {
     try {
-      const googleId = req.session.googleId;
+      const googleId = req.userInfo.googleId;
       const refreshToken = await getRefreshToken(googleId);
   
       if (!refreshToken) {
@@ -179,7 +182,7 @@ async function getEvents(req, res) {
   // Get list of user's calendars
   async function getCalendars(req, res) {
     try {
-      const googleId = req.session.googleId;
+      const googleId = req.userInfo.googleId;
       const refreshToken = await getRefreshToken(googleId);
   
       if (!refreshToken) {
@@ -199,7 +202,7 @@ async function getEvents(req, res) {
   
 // Logout function
 function logout(req, res) {
-    req.session.destroy(err => {
+    req.userInfo.destroy(err => {
       if (err) {
         console.error("Error destroying session:", err);
         return res.status(500).send("Error logging out");
@@ -211,12 +214,9 @@ function logout(req, res) {
 
 
   module.exports = {
-    googleOAuth2ConsentScreen,
-    oAuth2CallbackHandler,
     isAuthenticated,
     getEvents,
     getCalendars,
     addWorkplace,
-    calculateEarnings,
     logout
   };

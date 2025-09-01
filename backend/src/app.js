@@ -10,6 +10,12 @@ const userConfigRoutes = require("./routes/crudRoutes.js")
 
 const config = require("./config/config")
 
+const cors_origins = process.env.CORS_LINK || [
+    "https://urshiftmate.com",      // Remove www version
+    "https://www.urshiftmate.com",  // Keep www version
+    "https://urshiftmate.vercel.app"
+]
+
 const app = express();
 
 const expressSession = require('express-session');
@@ -23,34 +29,11 @@ const cookieParser = require('cookie-parser');
 
 app.use(express.json());
 app.use(cookieParser());
-// Add this import at the top
-const MongoStore = require('connect-mongo');
 
-// Replace your entire session configuration with this:
-app.use(session({
-  name: "sc.sid",
-  secret: config.sessionSecret,
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    touchAfter: 24 * 3600 // lazy session update
-  }),
-  cookie: {
-    secure: true,
-    httpOnly: true,
-    sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 14
-  },
-}));
 
 // Configure CORS to allow requests from frontend (React)
 app.use(cors({
-  origin: [
-    "https://urshiftmate.com",      // Remove www version
-    "https://www.urshiftmate.com",  // Keep www version
-    "https://urshiftmate.vercel.app"
-],   // Production frontend
+  origin: cors_origins,   // Production frontend
   credentials: true,  // Allow cookies/session sharing
 }));
 
@@ -87,7 +70,7 @@ app.use((err, req, res, next) => {
 });
 // Endpoint to get session userId
 app.get("/user/session", (req, res) => {
-  res.json({ userId: req.session.googleId || null });
+  res.json({ userId: req.userInfo.googleId || null });
 });
 
 // Serve static files from the Vite build

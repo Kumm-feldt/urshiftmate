@@ -7,42 +7,34 @@ router.get("/google", googleOAuth2ConsentScreen);
 router.get("/google/callback", oAuth2CallbackHandler);
 router.get("/logout", logout);
 
-
+/*
 router.get("/status", (req, res) => {
-  console.log("=== AUTH STATUS DEBUG ===");
-  console.log("Session ID:", req.sessionID);
-  console.log("Session data:", req.session);
-  console.log("Cookies:", req.cookies);
-  console.log("Headers:", req.headers.cookie);
-  console.log("========================");
-  
-  if (req.session?.isAuthenticated) {
+  if (req.userInfo?.isAuthenticated) {
     return res.json({ 
       isAuthenticated: true, 
-      user: req.session.googleId 
+      user: req.userInfo.googleId 
     });
   }
   return res.status(401).json({ isAuthenticated: false });
 });
-
-// ++++++++++++++++++++++ test ++++++++++++++++++++++
-router.get("/cookie-test", (req, res) => {
-  // Set a simple cookie
-  res.cookie('test-cookie', 'test-value', {
-    httpOnly: false,  // Allow JavaScript to read it for testing
-    secure: true,
-    sameSite: 'none',
-    maxAge: 1000 * 60 * 60
-  });
+*/
+router.get("/verify-token", (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
   
-  res.json({ message: 'Cookie set' });
+  if (!token) {
+    return res.status(401).json({ isAuthenticated: false });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res.json({ 
+      isAuthenticated: true, 
+      user: { googleId: decoded.googleId, name: decoded.name }
+    });
+  } catch (error) {
+    return res.status(401).json({ isAuthenticated: false });
+  }
 });
 
-router.get("/cookie-check", (req, res) => {
-  console.log("All cookies:", req.cookies);
-  res.json({ 
-    cookies: req.cookies,
-    testCookie: req.cookies['test-cookie']
-  });
-});
+
 module.exports = router;

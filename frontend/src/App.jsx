@@ -4,6 +4,7 @@ import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import Settings from "./components/Settings";
 import Profile from "./components/Profile";
+import AuthSuccess from "./components/AuthSuccess";
 import JobsCalendar from "./components/JobsCalendar";
 
 import { AuthContext } from "./AuthContext";
@@ -14,19 +15,29 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const App = () => {
   const [auth, setAuth] = useState({ isAuthenticated: false, user: null });
-  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/auth/status`, { credentials: "include" }) // Fetch session status
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    fetch(`${API_URL}/auth/verify-token`, { 
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then((res) => res.json())
       .then((data) => {
-          setAuth(data)
-          setLoading(false);
+        setAuth(data);
+        setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching auth status:", error)
-        setLoading(false)
+        console.error("Error fetching auth status:", error);
+        localStorage.removeItem('authToken');
+        setLoading(false);
       });
   }, []);
 
@@ -36,9 +47,11 @@ const App = () => {
 
 
   return (
-      <AuthContext.Provider value={{ auth, setAuth }}>
+    <AuthContext.Provider value={{ auth, setAuth }}>
     <Router>
       <Routes>
+        <Route path="/auth-success" element={<AuthSuccess />} />
+
         <Route path="/login" element={auth.isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/dashboard" element={auth.isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
         <Route path="/settings" element={auth.isAuthenticated ? <Settings /> : <Navigate to="/login" />} />

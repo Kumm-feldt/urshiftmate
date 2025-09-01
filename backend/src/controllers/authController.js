@@ -2,7 +2,14 @@ const { User } = require("../models/User");
 const { google } = require("googleapis");
 require('dotenv').config();
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
+let red_uri_frontend;
+if(process.env.MODE == 'dev'){
+  red_uri_frontend = process.env.CORS_LINK;
+}else{
+  red_uri_frontend = process.env.PROD_CORS_LINK;
+}
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -16,11 +23,11 @@ function generateState() {
 exports.googleOAuth2ConsentScreen = async (req, res) => {
   const state = generateState();
   // OPTIONAL: stash state for CSRF protection
-  // req.session.oauthState = state;
+  // req.userInfo.oauthState = state;
 
   // If you can identify the user before auth (e.g., existing session),
   // check whether they already have a refresh token:
-  const googleId = req.session?.googleId;
+  const googleId = req.userInfo?.googleId;
   let hasRefresh = false;
   if (googleId) {
     const existing = await User.findOne({ googleId }, { refreshToken: 1 });
@@ -84,24 +91,15 @@ exports.oAuth2CallbackHandler = async (req, res) => {
       await user.save();
     }
 
-    // Set user session
-    console.log("Setting session data...");
-    req.session.googleId = googleId;
-    req.session.isAuthenticated = true;
-    
-    console.log("Session before save:", req.session);
-    
-    // CRITICAL: Save session before redirect
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-        return res.status(500).send("Session save failed");
-      }
-      
-      console.log("Session saved! Redirecting...");
-      console.log("Final session state:", req.session);
-      res.redirect("https://urshiftmate.com/dashboard");
-    });
+    // Create JWT token 
+    const jwtToken = jwt.sign(
+      { googleId, name, email },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '14d' }
+    );
+    // Redirect with token as query parameter
+
+    res.redirect(`${red_uri_frontend}/auth-success?token=${jwtToken}`);
 
 } catch (error) {
     console.error("OAuth callback error:", error);
@@ -112,12 +110,12 @@ exports.oAuth2CallbackHandler = async (req, res) => {
 // Logout function
 exports.logout = (req, res) => {
  // res.clearCookie("user");
-  req.session.destroy((err) => {
+  req.userInfo.destroy((err) => {
     if (err) {
       console.error("Error destroying session:", err);
       return res.status(500).send("Error logging out");
     }
-    res.redirect("https://urshiftmate.com/login");
+    res.redirect(`${red_uri_frontend}/login`);
 
   });
 };

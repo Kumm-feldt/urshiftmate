@@ -5,38 +5,25 @@ const CRUD_API = `${API_BASE}/user/config`
 const AUTH_API = `${API_BASE}/auth`
 
 
+// ------------- JWT token helpers -------------
+const getAuthToken = () => localStorage.getItem('authToken');
+
+const authHeaders = () => {
+  const token = getAuthToken();
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
 
 
 
-
+// Not used anymore
 /*
-// ---- JWT token helpers ----
-let authToken = sessionStorage.getItem("jwt") || null;
-
-export function setAuthToken(token) {
-  authToken = token || null;
-  if (authToken) {
-    sessionStorage.setItem("jwt", authToken);
-  } else {
-    sessionStorage.removeItem("jwt");
-  }
-}
-
-export function getAuthToken() {
-  return authToken;
-}
-
-function authHeader() {
-  return authToken ? { Authorization: `Bearer ${authToken}` } : {};
-}
-*/
-
-// ---------------AUTH HELPER------------
-
 export async function ensureAuth() {
   try {
     const response = await fetch(`${AUTH_API}/status`, {
-      credentials: "include",
+            credentials: "include",
+      headers: {
+        ...authHeaders()
+      }
     });
     
     if (response.ok) {
@@ -50,11 +37,16 @@ export async function ensureAuth() {
     return { isAuthenticated: false };
   }
 }
+*/
+
 
 export async function logout() {
   try {
     const response = await fetch(`${API_BASE}/logout`, {
-      credentials: "include",
+            credentials: "include",
+      headers: {
+        ...authHeaders()
+      }
     });
     
     if (response.ok) {
@@ -91,7 +83,10 @@ function formatDateWeek(isoDate, locale = "en-US"){
 export async function fetchDetailedEvents (index){
   try {
     const response = await fetch(`${API}/detailedEvents?index=${index}`, {
-      credentials: "include",
+            credentials: "include",
+      headers: {
+        ...authHeaders()
+      }
     });
 
     const data = await response.json().catch(()=>null)
@@ -120,7 +115,10 @@ export async function fetchDetailedEvents (index){
 export async function fetchSummarizedEvents (index) {
     try {
       const response = await fetch(`${API}/summaryEvents?index=${index}`, {
-        credentials: "include",
+      credentials: "include",
+      headers: {
+        ...authHeaders()
+      }
       });
 
     const data = await response.json().catch(()=>null)
@@ -149,7 +147,10 @@ export async function fetchSummarizedEvents (index) {
 export async function fetchUserSummary (index) {
     try {
       const response = await fetch(`${API}/summaryUser?index=${index}`, {
-        credentials: "include",
+              credentials: "include",
+      headers: {
+        ...authHeaders()
+      }
       });
  
     const data = await response.json().catch(()=>null)
@@ -186,7 +187,10 @@ export async function fetchUserSummary (index) {
 export async function fetchUserInfo (index) {
     try {
       const response = await fetch(`${API}/user/info?index=${index}`, {
-        credentials: "include",
+              credentials: "include",
+      headers: {
+        ...authHeaders()
+      }
       });
  
     const data = await response.json().catch(()=>null)
@@ -225,13 +229,17 @@ export async function insertWorkplace (workplace, wage) {
 
      fetch(`${CRUD_API}/workplace`, {
       method: "POST",
-      credentials: "include",
+            credentials: "include",
+      headers: {
+        ...authHeaders()
+      },
       body: JSON.stringify({
         workplace: workplace,
         hourlyRate: wage
       }),
       headers: {
-        "Content-type": "application/json; charset=UTF-8"
+        "Content-Type": "application/json; charset=UTF-8",
+        ...authHeaders(),
       },
 
     });
@@ -250,7 +258,10 @@ export async function toggleCalendar(calendarId, summary, active, primary){
   if(active){
     try {
           const res = await fetch(`${CRUD_API}/calendars/delete`, {
-            credentials: "include", 
+                  credentials: "include",
+      headers: {
+        ...authHeaders()
+      } ,
             method: "PUT", 
             body: JSON.stringify({
               calendarId : calendarId,
@@ -276,7 +287,10 @@ export async function toggleCalendar(calendarId, summary, active, primary){
     // add calendar
     try {
       const res = await fetch(`${CRUD_API}/calendars/add`, {
-        credentials: "include", 
+              credentials: "include",
+      headers: {
+        ...authHeaders()
+      } ,
         method: "PUT", 
         body: JSON.stringify({
             calendarId : calendarId,
@@ -302,6 +316,9 @@ export async function toggleCalendar(calendarId, summary, active, primary){
 export async function fetchWorkplaces() {
   try {
     const response = await fetch(`${CRUD_API}/workplace`, {
+       headers: {
+        ...authHeaders()
+      } ,
       credentials: "include"
     });
 
@@ -331,6 +348,9 @@ export async function fetchWorkplaces() {
 
 export async function getSessionUserId() {
   const res = await fetch(`${API_BASE}/user/session`, {
+     headers: {
+        ...authHeaders()
+      } ,
     credentials: "include" 
   });
   const data = await res.json();
@@ -339,6 +359,9 @@ export async function getSessionUserId() {
 
 export async function calendarExists() {
   const res = await fetch(`${API}/existCalendars`, {
+     headers: {
+        ...authHeaders()
+      } ,
     credentials: "include" 
   });
   const data = await res.json();
@@ -349,6 +372,9 @@ export async function calendarExists() {
 export async function fetchCalendars(){
   try {
     const response = await fetch(`${CRUD_API}/calendars`, {
+       headers: {
+        ...authHeaders()
+      } ,
       credentials: "include"
     });
 
@@ -378,6 +404,9 @@ export async function fetchCalendars(){
 export async function fetchActiveCalendars(){
   try{
       const response = await fetch(`${CRUD_API}/calendars/active`,{
+         headers: {
+        ...authHeaders()
+      } ,
         credentials:"include"
       });
 
@@ -407,6 +436,9 @@ export async function fetchActiveCalendars(){
 export async function randomPhrase(type){
   try{
     const response = await fetch(`${CRUD_API}/randomPhrase?phraseType=${type}`, {
+       headers: {
+        ...authHeaders()
+      } ,
         credentials:"include"
       })
     const data = await response.json().catch(()=>null)

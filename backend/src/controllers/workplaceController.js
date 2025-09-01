@@ -15,7 +15,7 @@ async function addWorkplace (req, res) {
     try{
       // if not received, then use session to find it 
       if(!userId){
-        googleId = String(req.session.googleId);
+        googleId = String(req.userInfo.googleId);
         const user = await User.findOne({ googleId });
 
         if(!user){
@@ -40,7 +40,7 @@ async function addWorkplace (req, res) {
 
   async function getWorkplace (req, res) {
     let data = []
-    const googleId = req.session.googleId;
+    const googleId = req.userInfo.googleId;
 
     try{
     let user = await User.findOne({googleId})

@@ -4,16 +4,19 @@ const workplaceController  = require("../controllers/workplaceController");
 const { deleteCalendar, addCalendar, getGoogleCalendars, getCalendars, getActiveCalendars } = require("../controllers/googleController");
 const { create } = require("../controllers/oneTimeSetup");
 const { getRandomPhrase } = require("../controllers/generalController");
+const { verifyJWT } = require("../middlewares/jwtMiddleware");
 
-router.post("/workplace", workplaceController.addWorkplace);
-router.get("/workplace", workplaceController.getWorkplace);
+router.post("/workplace",verifyJWT, workplaceController.addWorkplace);
+router.get("/workplace", verifyJWT,workplaceController.getWorkplace);
 
-router.get("/calendars", getGoogleCalendars, getCalendars)
-router.get("/calendars/active", getActiveCalendars);
+router.get("/calendars", verifyJWT,getGoogleCalendars, getCalendars)
+router.get("/calendars/active", verifyJWT,getActiveCalendars);
 
-router.put("/calendars/delete", deleteCalendar);
-router.put("/calendars/add", addCalendar);
+router.put("/calendars/delete",verifyJWT, deleteCalendar);
+router.put("/calendars/add", verifyJWT,addCalendar);
 
+
+// not need JWT
 router.get("/create/setup", create);
 router.get("/randomPhrase", getRandomPhrase)
 

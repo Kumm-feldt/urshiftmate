@@ -41,22 +41,8 @@ function formatPhrase(phrase, values) {
 
 
 const Dashboard = ({showSidebar = true}) => {
-// 1) check status
-      const { auth, setAuth } = useContext(AuthContext);
-  
-  useEffect(() => {
-    fetch(`${API_URL}/auth/status`, { credentials: "include" }) // Fetch session status
-      .then((res) => res.json())
-      .then((data) => {
-          setAuth(data)
-          setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching auth status:", error)
-        setLoading(false)
-      });
-  }, []);
-
+  // 1) check status from the Context
+  const { auth } = useContext(AuthContext);
 
   const [detEvents, setDetailedEvents] = useState([]);
   const [summEvents, setSummarizedEvents] = useState([]);
@@ -120,9 +106,7 @@ const Dashboard = ({showSidebar = true}) => {
     let alive = true;
 
     (async () => {
-      // 1) auth gate
-      const auth = await api.ensureAuth();
-
+   // AuthContext already handles auth, so just check if authenticated
       if (!auth.isAuthenticated) {
         if (!alive) return;
         window.location.replace("/login");

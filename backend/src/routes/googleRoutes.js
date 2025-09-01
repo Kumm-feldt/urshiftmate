@@ -2,10 +2,12 @@ const express = require("express");
 const googleController = require("../controllers/googleController");
 const { isAuthenticated } = require("../middlewares/authMiddleware");
 const { asyncHandler } = require("../middlewares/asyncHandler");
+const { verifyJWT } = require("../middlewares/jwtMiddleware");
 
 const router = express.Router();
 
 // returns true or false if there is calendars in db if it is true do not call the other endpoints (in the frontend)
+router.use("/api", verifyJWT)
 // I avoided using .use() because it needs to access ?index query param 
 router.get("/api/user/info", asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.getIndependentUserSummary))
 

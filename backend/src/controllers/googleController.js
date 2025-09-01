@@ -85,7 +85,7 @@ async function isActiveCalendar(googleId, calName, isPrimary){
 
 // #### DELETE CALENDAR #####
 async function deleteCalendar(req, res){
-  let googleId = req.session?.googleId;
+  let googleId = req.userInfo?.googleId;
   let calendarToDelete = req.body?.calendarId;
   let primary = req.body?.primary;
 
@@ -134,7 +134,7 @@ async function deleteCalendar(req, res){
 
 // #### ADD CALENDAR ####
 async function addCalendar(req, res){
-  let googleId = req.session?.googleId;
+  let googleId = req.userInfo?.googleId;
 
   let calendarId = req.body?.calendarId;
   let calendarName = req.body?.summary;
@@ -167,7 +167,7 @@ async function addCalendar(req, res){
 
 // ############################ Process Data Functions ##############################
 async function getGoogleCalendars(req, res, next){
-  const googleId = req.session.googleId
+  const googleId = req.userInfo.googleId
   let calendarList = []
    try{
     const refreshToken = await getRefreshToken(googleId);
@@ -365,7 +365,7 @@ try{
 }
 
 async function independentUserSummary(req, res, next){
-  const googleId = req.session.googleId;
+  const googleId = req.userInfo.googleId;
   const dates = getDates(req.query.index);
   res.locals.dates = dates;
   
@@ -438,7 +438,7 @@ function httpError(statusCode, message) {
 }
 
 async function existCalendarsInDb(req, res, next){
-  const googleId = req.session.googleId;
+  const googleId = req.userInfo.googleId;
   try{
     let user = await User.findOne({ googleId }).select("calendars -_id");
     let activeCalendars = user?.calendars || [];
@@ -462,7 +462,7 @@ async function existCalendarsInDb(req, res, next){
 
 // ############################ API / End Point Data Collector #############################
 async function dataCollector(req, res, next){
-        const googleId = req.session.googleId;
+        const googleId = req.userInfo.googleId;
         const index = req.query.index;
 
         if (!googleId) throw httpError(401, "Not authenticated with Google.");
@@ -546,7 +546,7 @@ async function getCalendars(req, res){
 }
 
 async function getActiveCalendars(req, res){
-  const googleId = req.session.googleId
+  const googleId = req.userInfo.googleId
   try{
     let user = await User.findOne({googleId})
     if(user){
