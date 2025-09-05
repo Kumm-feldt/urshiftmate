@@ -1,6 +1,7 @@
 import React from "react";
 import "./Login.css"
 import googleLogo from "../assets/google-logo.png" 
+import Header from "./Header";
 
 // Ensure environment variable is correctly accessed
 const API_URL = import.meta.env.VITE_API_URL;
@@ -20,7 +21,9 @@ const formInput = <>        <div>
                           </div>
             <a href="#" className="ms-auto text-sm text-blue-700 hover:underline dark:text-blue-500">Lost Password?</a>
         </div></>
-  return (
+  return (<>
+
+    <Header></Header>
 
 <div className="login-wrapper">
 
@@ -48,7 +51,7 @@ const formInput = <>        <div>
     </form>
 </div>
 </div>
-
+  </>
   
   );
 }

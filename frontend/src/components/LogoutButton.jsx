@@ -23,13 +23,11 @@ const LogoutButton =()=> {
 
 
   return (
-    <button
+    <li
       onClick={handleLogout}
-      className="flex items-center w-full p-2 text-sm font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-    >
-      <i className="bi bi-box-arrow-right me-2"></i>
-      Logout
-    </button>
+      className="bi bi-box-arrow-right me-2">
+      <span className="ms-3">Logout</span>
+    </li>
   );
 };
 

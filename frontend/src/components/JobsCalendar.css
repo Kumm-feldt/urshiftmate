@@ -1,3 +1,7 @@
+*{
+    font-family: "Open Sans", sans-serif;
+
+}
 .jobs-table-container{
     width: 400px;
     display: flex;
@@ -89,17 +93,65 @@
     }
 
     .grid-layout{
-  display: grid;
   grid-template-columns: 220px 1fr 1fr;
-  grid-template-rows: auto;
   grid-template-areas: 
     "sidebar header header"
     "sidebar main-form left-grid"
     "sidebar main-cal "
-
 }
 .main-2{
   margin-left: 75px;
 }
+
+}
+
+@media (max-width: 500px) {
+    .grid-layout{
+      grid-template-columns: 1fr;
+      grid-template-areas: 
+              "sidebar"
+        "header"
+        "main-form"
+        "left-grid"
+        "main-cal"
+
+    }
+    .jobform-form .div-wrapper{
+      flex-direction: column;
+    }
+
+    .div-wrapper .div-form{
+      width: 90%;
+    }
+    .div-wrapper .div-form input{
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 5px;
+    }
+    .flex-row-calendars{
+      flex-direction: column;
+    }
+    .main-2{
+      margin-left: 0;
+    }
+    .dashboard-div-container .h2-title{
+      font-weight: 600;
+    }
+    .jobform-form{
+      margin-bottom: 40px;
+    }
+    .grid-jobs{
+      margin-bottom: 40px;
+
+    }
+    .h2-title{
+      text-align: center;
+    }
+    .grid-header{
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    .h1-title-table{
+      margin-bottom: 0px;
+    }
 
 }

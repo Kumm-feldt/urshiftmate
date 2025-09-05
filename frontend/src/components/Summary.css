@@ -31,3 +31,60 @@
     color: #00122c;
 }
 
+/*============= Responsive ================ */
+@media(max-width: 500px){
+        .summary-div{
+            width: 65vw;
+            height: 160px;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .summary-h5, .summary-date, .summary-pretax-money-amount{
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .summary-money-amount{
+            font-size: 28px;
+            font-weight: 800;
+        }
+        .summary-h5, .summary-date, .summary-money-amount, .summary-pretax-money-amount{
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-middle{
+            width: 90vw;
+        }
+        .table-holder, .dashboard-middle .table-container  {
+            width: 100%;
+        }
+
+        .text-xs, tr {
+            font-size: 0.70rem;
+        }
+        .dashboard-toggle{
+            font-size: 14px;
+        }
+        .px-6{
+            padding-left: 1rem;
+            padding-right: 0.5rem;
+        }
+        .h1-title-table{
+            font-size: 20px;
+        }
+        .h2-title-table{
+             font-size: 16px;
+        }
+        .summary-date{
+            margin-top: 0px;
+        }
+        .summary-pretax-money-amount{
+            margin-bottom: 0px;
+        }
+        .summary-container{
+            width: 100%;
+        }
+}
+

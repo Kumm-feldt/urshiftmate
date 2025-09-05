@@ -8,6 +8,7 @@ import AuthSuccess from "./components/AuthSuccess";
 import JobsCalendar from "./components/JobsCalendar";
 import Policy from "./components/Policy"
 import { AuthContext } from "./AuthContext";
+import Home from "./components/Home";
 
 
 // Use correct environment variable format
@@ -50,6 +51,8 @@ const App = () => {
     <AuthContext.Provider value={{ auth, setAuth }}>
     <Router>
       <Routes>
+        <Route path="/" element={<Home />} />
+
         <Route path="/policy" element={<Policy />} />
 
         <Route path="/auth-success" element={<AuthSuccess />} />

@@ -1,0 +1,148 @@
+
+
+/* Header */
+.header-flex{
+    display: flex;
+    justify-content: space-between;
+    margin: 30px 40px;
+    margin-bottom: 0;
+}
+.flex-container{
+    display: flex;
+}
+.left-h-container,
+.image-container-flex{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.image-container-flex .header-title{
+    font-family: "Open Sans", sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-left: 40px;
+}
+
+.left-h-container{
+    width: 100px;
+}
+
+
+/* Button */
+.button-54 {
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-decoration: none;
+  text-transform: uppercase;
+  color: #000;
+  cursor: pointer;
+  border: 3px solid;
+  padding: 0.25em 0.5em;
+  box-shadow: 1px 1px 0px 0px, 2px 2px 0px 0px, 3px 3px 0px 0px, 4px 4px 0px 0px, 5px 5px 0px 0px;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-54:active {
+  box-shadow: 0px 0px 0px 0px;
+  top: 5px;
+  left: 5px;
+}
+
+@media (min-width: 768px) {
+  .button-54 {
+    padding: 0.25em 0.75em;
+  }
+}
+
+
+/* Main */
+.main-container {
+  display: flex;
+  justify-content: flex-start; /* keeps the blue container on the left */
+  align-items: center;         /* vertically centers */
+  position: relative;
+  height: 100vh;               /* so it's centered in the viewport */
+}
+
+.blue-container {
+  width: 60vw;
+  height: 90vh;
+  background-color: #00122c;
+  position: relative;
+}
+
+.cal-image {
+  width: 700px;
+  height: auto;
+  border-radius: 20px;
+
+  position: absolute;
+  top: 50%;          /* halfway down the blue box */
+  left: 60vw;        /* just outside the right edge of the blue box */
+  transform: translate(-50%, -50%);
+}
+
+.hero-container{
+    color: #ffffff;
+    margin: 200px 50px;
+    width: 400px;
+}
+.hero-title {
+  font-size: 2.5rem;       /* Large, bold headline */
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;       /* Comfortable paragraph size */
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 700px;        /* Keeps text easy to read */
+  margin: 0 auto;          /* Centers the block */
+}
+.hero-container .button-54 {
+  color: #ffffff;
+  background-color: #ffffff27;
+  border: #ffffff;
+
+}
+.hero-button-start{
+    margin-top: 20px;
+    text-align: center;
+
+}
+
+/*============= Responsive ================ */
+@media(max-width: 500px){
+        .blue-container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        }
+
+        .cal-image{
+            display: none;
+        }
+
+        .header-flex{
+            margin: 20px 10px ;
+
+        }
+        .image-container-flex .header-title{
+            font-size: 18px;
+            margin-left: 20px;
+            
+        }
+        .container-policy{
+            display: none;
+        }
+}
