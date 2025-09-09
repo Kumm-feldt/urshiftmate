@@ -26,6 +26,10 @@ function endOfDayLocal(d, timezone = "America/Chicago") {
   return moment.tz(d, timezone).endOf("day");
 }
 
+function convertDateOnlyToTimezone(dateOnlyString, timezone = "America/Chicago") {
+  // Parse as midnight in the specified timezone and return ISO string
+  return moment.tz(dateOnlyString + "T00:00:00", timezone).toISOString();
+}
 
 function getDates(ind = 0, timezone = "America/Chicago") {
   const index = Number(ind);
@@ -45,7 +49,7 @@ function getDates(ind = 0, timezone = "America/Chicago") {
         weekOneEnd: next.weekOneEnd,
         weekTwoStart: next.weekTwoStart,
         weekTwoEnd: next.weekTwoEnd,
-        checkDay: next.checkDate,
+        checkDay: convertDateOnlyToTimezone(next.checkDate, timezone),
       };
     }
   }
