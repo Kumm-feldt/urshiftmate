@@ -9,6 +9,8 @@ import JobsCalendar from "./components/JobsCalendar";
 import Policy from "./components/Policy"
 import { AuthContext } from "./AuthContext";
 import Home from "./components/Home";
+import { ThreeDot } from "react-loading-indicators";
+
 
 
 // Use correct environment variable format
@@ -43,7 +45,7 @@ const App = () => {
   }, []);
 
 
-  if (loading) return <div>Loading...</div>; // Or a spinner
+  if (loading) return <div className="loading"><ThreeDot color="#070c22ff" size="medium" text="" textColor="" /></div>;
 
 
 

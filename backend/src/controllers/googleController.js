@@ -13,46 +13,43 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URL
 );
-
+const userTimezone = "America/Chicago";
 
 // ############################ Helper Functions ##############################
 
-function startOfDayLocal(d) {
-  return moment.tz(d, "America/Chicago").startOf("day");
-
-}
-function endOfDayLocal(d) {
-  return moment.tz(d, "America/Chicago").endOf("day");
+// Updated helper functions using user's actual timezone
+function startOfDayLocal(d, timezone = "America/Chicago") {
+  return moment.tz(d, timezone).startOf("day");
 }
 
-function getDates(ind = 0) {
+function endOfDayLocal(d, timezone = "America/Chicago") {
+  return moment.tz(d, timezone).endOf("day");
+}
+
+
+function getDates(ind = 0, timezone = "America/Chicago") {
   const index = Number(ind);
   const now =  new Date();
-  const today = startOfDayLocal(now);
+  const today = startOfDayLocal(now, timezone);
 
+  for(let i = 0; i < dateFile.length; i++){
+    const from = startOfDayLocal(new Date(dateFile[i].weekOneStart), timezone);
+    const to = endOfDayLocal(new Date(dateFile[i].weekTwoEnd), timezone);
 
-  for(let i = 0; i<dateFile.length; i++){
-    const from = startOfDayLocal(new Date(dateFile[i].weekOneStart)); // parse and normalize local
-    const to   = endOfDayLocal(new Date(dateFile[i].weekTwoEnd));     // inclusive end-of-day
-
-   if (today >= from && today <= to) {
-
+    if (today >= from && today <= to) {
       const next = dateFile[i + index];
-
-      if (!next) return null; // guard against out-of-bounds
+      if (!next) return null;
+      
       return {
         weekOneStart: next.weekOneStart,
-        weekOneEnd:   next.weekOneEnd,
+        weekOneEnd: next.weekOneEnd,
         weekTwoStart: next.weekTwoStart,
-        weekTwoEnd:   next.weekTwoEnd,
-        checkDay:     next.checkDate,
+        weekTwoEnd: next.weekTwoEnd,
+        checkDay: next.checkDate,
       };
     }
-
   }
-
-
-  return null; // If no match found
+  return null;
 }
 
 async function isActiveCalendar(googleId, calName, isPrimary){
@@ -207,36 +204,33 @@ async function getGoogleCalendars(req, res, next){
 }
 
 // !===================== modify this function to obtain data from other calendars as well ===========
-
-async function getEvents(googleId, dates, week)
-{
-  let startDate = new Date()
-  let endDate = new Date()
-  let allEvents = []
+// Updated getEvents function with timezone
+async function getEvents(googleId, dates, week, timezone = "America/Chicago") {
+  let startDate = new Date();
+  let endDate = new Date();
+  let allEvents = [];
 
   if (week == "first") {
-    startDate = startOfDayLocal(dates.weekOneStart).toISOString();
-    endDate   = endOfDayLocal(dates.weekOneEnd).toISOString();
+    startDate = startOfDayLocal(dates.weekOneStart, timezone).toISOString();
+    endDate = endOfDayLocal(dates.weekOneEnd, timezone).toISOString();
   } else {
-    startDate = startOfDayLocal(dates.weekTwoStart).toISOString();
-    endDate   = endOfDayLocal(dates.weekTwoEnd).toISOString();
+    startDate = startOfDayLocal(dates.weekTwoStart, timezone).toISOString();
+    endDate = endOfDayLocal(dates.weekTwoEnd, timezone).toISOString();
   }
 
-  try{
+  try {
     const refreshToken = await getRefreshToken(googleId);
     let user = await User.findOne({ googleId }).select("calendars -_id");
-
     let activeCalendars = user?.calendars || [];
 
     if (activeCalendars.length === 0) {
       return null;
     }
 
-
     if (!refreshToken) {
       throw new Error("No refresh token found. Please re-authenticate.");
-      }
-  
+    }
+
     oauth2Client.setCredentials({ refresh_token: refreshToken });
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
@@ -248,34 +242,27 @@ async function getEvents(googleId, dates, week)
         singleEvents: true,
         orderBy: "startTime",
       });
-      allEvents.push(...response.data.items); // note spread if you want flat array
-
+      allEvents.push(...response.data.items);
     }
 
-  return allEvents;
+    return allEvents;
 
-} catch (error) {
+  } catch (error) {
     console.error("Error fetching events:", error);
-    throw new Error(`Error fetching events: ${error}`)
+    throw new Error(`Error fetching events: ${error}`);
   }
-
-
 }
+function filterDateEvents(startDateTime, endDateTime, timezone = "America/Chicago") {
+  const startDate = moment.tz(startDateTime, timezone);
+  const endDate = moment.tz(endDateTime, timezone);
 
-function filterDateEvents(startDateTime, endDateTime) {
-  const startDate = new Date(startDateTime);
-  const endDate = new Date(endDateTime);
+  const startStr = startDate.format("M/D/YYYY");
+  const endStr = endDate.format("M/D/YYYY");
 
-  // Extract only the date part
-  const startStr = startDate.toLocaleDateString("en-US");
-  const endStr = endDate.toLocaleDateString("en-US");
-
-  // If both are the same day → just one date
   if (startStr === endStr) {
     return startStr;
   }
 
-  // Otherwise → show range
   return `${startStr} - ${endStr}`;
 }
 
@@ -294,9 +281,10 @@ async function filterEvents(googleId, eventList){
          jobs.forEach((job)=>{
   
           if(event.summary.toLowerCase().includes(job.workplace.toLowerCase())){
-            let totalHours = (new Date(event.end.dateTime) - new Date(event.start.dateTime)) / (1000 * 60 * 60);
-            let totalWage = totalHours * job.hourlyRate;
-  
+            const startMoment = moment.tz(event.start.dateTime, userTimezone);
+            const endMoment = moment.tz(event.end.dateTime, userTimezone);
+              let totalHours = endMoment.diff(startMoment, 'hours', true);
+              let totalWage = totalHours * job.hourlyRate;
   
             filteredData.push({
               workplace: job.workplace,
