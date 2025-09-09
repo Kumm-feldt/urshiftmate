@@ -289,9 +289,9 @@ async function filterEvents(googleId, eventList){
             filteredData.push({
               workplace: job.workplace,
               wage: job.hourlyRate,
-              date: filterDateEvents(event.start.dateTime, event.end.dateTime),
-              startTime: new Date(event.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              endTime: new Date(event.end.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                date: filterDateEvents(event.start.dateTime, event.end.dateTime, userTimezone),
+                startTime: startMoment.format('hh:mm A'),
+                endTime: endMoment.format('hh:mm A'),
 
               totalWage: Math.round(totalWage * 100) / 100,
               totalHours: Math.round(totalHours * 100) / 100
