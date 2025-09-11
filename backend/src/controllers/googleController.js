@@ -133,14 +133,53 @@ async function deleteCalendar(req, res){
     }
 }
 
+// #### DELETE WORKPLACE ####
+async function deleteWorkplace (req, res){
+  let googleId = req.userInfo?.googleId;
+  let workplaceId = req.params.workplaceId;
+  if (!googleId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+   if (!workplaceId) {
+    return res.status(401).json({ error: "Workplace not provided" });
+  }
+
+    try{
+      const user = await User.findOne({ googleId });
+      if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+      // pull the calendar from the array; returns the *old* doc by default
+      const result = await Workplace.deleteOne(
+        {  
+          
+      _id: workplaceId, // <--- use _id
+      userId: user._id
+        
+        } 
+      );
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "User or workplace not found" });
+    }
+
+    return res.status(200).json({ deleted: true });
+
+
+    }catch(err){
+    console.error("Error deleting workplace:", err);
+    return res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+
+
+
 // #### ADD CALENDAR ####
 async function addCalendar(req, res){
   let googleId = req.userInfo?.googleId;
 
   let calendarId = req.body?.calendarId;
   let calendarName = req.body?.summary;
-
-
 
   if (!googleId) {
     return res.status(401).json({ error: "Not authenticated" });
@@ -555,5 +594,5 @@ async function getActiveCalendars(req, res){
 
 
 module.exports = {getSummaryEvents, getDetailEvents, dataCollector, getSummaryUser, getGoogleCalendars, getCalendars, getActiveCalendars,
-  addCalendar, deleteCalendar, existCalendarsInDb, independentUserSummary, getIndependentUserSummary
+  addCalendar, deleteCalendar, existCalendarsInDb, independentUserSummary, getIndependentUserSummary, deleteWorkplace
 }

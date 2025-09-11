@@ -47,7 +47,6 @@ return(
                     </div>
                     <div className="div-form i-wage">
                         <input className="jobform-input "  type="number" value={wage} onChange={handleWage} placeholder="$"/>
-                    
                     </div>
             <button className="jobform-button" type="submit">ADD</button>
                     

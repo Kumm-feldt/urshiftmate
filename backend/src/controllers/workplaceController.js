@@ -52,7 +52,8 @@ async function addWorkplace (req, res) {
         data.push(
           {
           workplace:  job.workplace,
-          hourlyRate: job.hourlyRate
+          hourlyRate: job.hourlyRate,
+          workplaceId: job._id
         }
       )
       })

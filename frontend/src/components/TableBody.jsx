@@ -1,6 +1,11 @@
+import { useState } from "react";
+
+
+
 const summaryRender = (data = [])=>{
         let totalHours = 0;
         let totalWage = 0;
+
 
         let rows =  data.map((eventData, index) =>{
             const wage = Number(eventData.wage) || 0;           // hourly wage
@@ -40,7 +45,10 @@ const summaryRender = (data = [])=>{
 
              return rows
         }
-const jobsRender = (data) =>(
+
+
+        
+const jobsRender = (data, deleteJob) =>(
     data.map((jobData, index)=>(
          <tr key={index} className="odd:bg-white  even:bg-gray-50  border-b  border-gray-200">
          
@@ -49,6 +57,9 @@ const jobsRender = (data) =>(
              </td> 
              <td className="px-6 py-4">
              ${(jobData.hourlyRate)}
+             </td> 
+             <td className="px-6 py-4">
+       <i className="bi bi-trash" onClick={() => deleteJob(jobData.workplaceId)}></i>
              </td> 
         </tr>
     ))
@@ -111,14 +122,14 @@ const detailedRender = (data = []) =>{
 }
 
 
-const TableBody = ({data, renderType}) =>{
+const TableBody = ({data, renderType, deleteJob}) =>{
     let rows;
     if( renderType === "Detailed"){
         rows = detailedRender(data);
     }else if(renderType === "Summary"){
         rows = summaryRender(data);
     }else if(renderType == "Jobs"){
-        rows = jobsRender(data)
+        rows = jobsRender(data, deleteJob)
     }
 
 
@@ -128,9 +139,6 @@ const TableBody = ({data, renderType}) =>{
          {
          rows
          }
-               
-            
-           
         </tbody>
 
     )

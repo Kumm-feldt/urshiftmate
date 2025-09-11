@@ -251,6 +251,24 @@ export async function insertWorkplace (workplace, wage) {
 };
 
 
+export async function deleteWorkplace (workplaceId) {
+  try {
+
+     fetch(`${CRUD_API}/workplace/${workplaceId}`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        ...authHeaders()
+      }
+    });
+
+
+  } catch (error) {
+    console.error("Error inserting:", error);
+  }
+};
+
+
 
 export async function toggleCalendar(calendarId, summary, active, primary){
   // delete calendar

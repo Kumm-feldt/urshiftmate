@@ -42,9 +42,9 @@ exports.googleOAuth2ConsentScreen = async (req, res) => {
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/calendar.readonly",
     ],
-    // If user already granted and we have refresh, try silent;
-    // otherwise FORCE consent so Google issues/returns refresh_token.
-    prompt: hasRefresh ? "none" : "consent",
+    // For returning users with refresh token, use select_account
+    // For new users, use consent to ensure refresh_token
+    prompt: "select_account",
     redirect_uri: process.env.GOOGLE_REDIRECT_URL,
     state,
   });

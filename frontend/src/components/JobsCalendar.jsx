@@ -16,7 +16,7 @@ import CalendarList from "./CalendarList.jsx";
 
 
 const JobSection = () =>{
-   const header = ["Worplace", "Wage"]
+   const header = ["Worplace", "Wage", ""]
 
     const [jobsData, setJobsData] = useState([]);
     const [calendarList, setCalendar] =useState([]);
@@ -34,19 +34,29 @@ const JobSection = () =>{
       }, []);
 
 
-    async function createJob(workplace, hourlyRate){
-        if(workplace && hourlyRate){
-            try{
-                await api.insertWorkplace(workplace, hourlyRate)
-                const newJob = { workplace, hourlyRate }; // Adjust this structure based on your API response
-                setJobsData(prevJobs => [...prevJobs, newJob]);
-            }catch(err){
-                console.log("ERROR", err)
-            }
-        }else{
-            console.log("No workplace nor wage provided")
+   async function createJob(workplace, hourlyRate){
+    if(workplace && hourlyRate){
+        try{
+            await api.insertWorkplace(workplace, hourlyRate)
+            // Refetch all jobs to get the complete data
+            const updatedJobs = await api.fetchWorkplaces();
+            setJobsData(updatedJobs);
+        }catch(err){
+            console.log("ERROR", err)
         }
     }
+}
+        async function deleteJob(workplaceId){
+            if(workplaceId){
+                try{
+                    await api.deleteWorkplace(workplaceId);
+  
+                    setJobsData(prevJobs => prevJobs.filter(job => job.workplaceId !== workplaceId));
+                }catch(err){
+                    console.log("ERROR: ", err)
+                }
+            }
+        }
 
     return(
         <div className="flex-row">
@@ -77,7 +87,7 @@ const JobSection = () =>{
                  </div>
                 <div className="table-container grid-jobs" >
                         <h2 className="h2-title-t">Current Jobs</h2>
-                        <Table columns={header} data={jobsData} renderType={"Jobs"}></Table>
+                        <Table columns={header} data={jobsData} renderType={"Jobs"} onSubmitHandler={deleteJob}></Table>
                 </div>
                   <div className="dashboard-div-container main-2">
                     <h2 className="h2-title-t">Available Calendars</h2>

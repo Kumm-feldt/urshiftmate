@@ -7,6 +7,8 @@ import JobsCalendar from "./JobsCalendar";
 import Profile from "./Profile";
 import LogoutButton from "./LogoutButton";
 import { Link } from "react-router-dom"; // Make sure to import Link
+import racoon from "../assets/ico.png" 
+
 
 const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar"];
 
@@ -73,6 +75,11 @@ const Sidebar = ()=>{
             >
                 <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 sidebar-div sidebar-wrapper">
                     <div className="icons-top">
+                        <div className="logo-div">
+                        <h2 className="h2-title-sidebar bebas-neue-regular ">U R S H I F T M A T E</h2>
+                        <img src={racoon} alt="log" className="logo-racoon-sidebar" />
+                        </div>
+
                         <h2 className="h2-title-sidebar">{formattedDate}</h2>
                        
                         <ul className="space-y-2 font-medium icons-top-ul">

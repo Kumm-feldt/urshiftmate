@@ -2,6 +2,14 @@
     font-family: "Open Sans", sans-serif;
 
 }
+
+.bi-trash{
+  cursor: pointer;
+}
+    .div-wrapper .div-form input{
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 5px;
+    }
 .jobs-table-container{
     width: 400px;
     display: flex;
@@ -123,10 +131,7 @@
     .div-wrapper .div-form{
       width: 90%;
     }
-    .div-wrapper .div-form input{
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 5px;
-    }
+
     .flex-row-calendars{
       flex-direction: column;
     }

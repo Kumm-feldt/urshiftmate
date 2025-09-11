@@ -1,5 +1,5 @@
 @url = https://urshiftmate.onrender.com/user/config
-
+@devUrl = http://localhost:8000/user/config
 
 
 ###
@@ -21,4 +21,4 @@ GET {{url}}/create/setup
 
 
 ###
-GET {{url}}/user/config/randomPhrase?phraseType=negative
+DELETE {{url}}devUrl/:workplaceId
