@@ -7,6 +7,7 @@ const path = require("path");
 const authRoutes = require("./routes/authRoutes");
 const googleRoutes = require("./routes/googleRoutes");
 const userConfigRoutes = require("./routes/crudRoutes.js")
+const clockRoutes = require("./routes/clockRoutes.js")
 
 const config = require("./config/config")
 
@@ -49,6 +50,8 @@ app.use("/auth", authRoutes);
 
 
 app.use("/google", googleRoutes);
+app.use("/clock", clockRoutes);
+
 app.use("/user/config", userConfigRoutes);
 app.use("/logout", logout);
 

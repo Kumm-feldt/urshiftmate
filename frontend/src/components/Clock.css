@@ -1,0 +1,105 @@
+.clock-wrapper{
+    display: flex;
+    width: 80vw;
+    height: 80vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.clock-in-circle{
+    background-color: rgb(0, 45, 10);
+}
+
+ .clock-out-circle{
+    background-color: rgb(45, 0, 0);
+ }
+
+
+.clock-in-circle, .clock-out-circle{
+        margin: 20px;
+        width: 100px;
+        height: 100px;
+        color: azure;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+}
+
+/* CALENDAR */
+.mycalendar-wrapper{
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.mycalendar-div{
+    width: 70vw;
+    height: 500px;
+
+}
+
+/* KEYPAD */
+.number-input{
+    width: 180px;
+    border: 1px solid #00113531;
+    border-radius: 10px;
+}
+
+
+.input-div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 180px; /* same as w-40 */
+  margin: 0 auto;
+}
+
+.key {
+  background-color: #f3f4f6; /* light gray */
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 10px;
+  padding: 12px 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #111827; /* gray-900 */
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.key:hover {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+.key:active {
+  background-color: #d1d5db; /* gray-300 */
+  transform: scale(0.95);
+}
+
+.key:nth-child(10) {
+  grid-column: span 3; /* makes the "0" span the full row */
+}
+
+.key:nth-child(11),
+.key:nth-child(12) {
+  font-size: 0.95rem;
+  color: white;
+  background-color: #8b0b0b; /* slightly lighter for Delete/Enter */
+}
+
+.key:nth-child(12) {
+  background-color: #001135; /* blue-500 for Enter */
+  font-weight: 600;
+  grid-column: span 2; /* makes the "0" span the full row */
+
+}
+
+.key:nth-child(12):hover {
+  background-color: #0011356e; /* blue-600 */
+
+}
+.key:nth-child(11):hover {
+  background-color: #8b0b0b80/* blue-600 */
+
+}
+

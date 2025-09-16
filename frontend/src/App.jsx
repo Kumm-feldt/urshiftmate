@@ -9,6 +9,8 @@ import JobsCalendar from "./components/JobsCalendar";
 import Policy from "./components/Policy"
 import { AuthContext } from "./AuthContext";
 import Home from "./components/Home";
+import Clock from "./components/Clock";
+
 import { ThreeDot } from "react-loading-indicators";
 
 
@@ -54,6 +56,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/clock" element={<Clock />} />
 
         <Route path="/policy" element={<Policy />} />
 
