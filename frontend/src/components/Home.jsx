@@ -3,7 +3,7 @@ import "./Home.css"
 import calendar from "../assets/calendar.png"
 import { Link } from "react-router-dom";
 import stepOne from "../assets/step1.png"
-import stepThree from "../assets/step3.png"
+import stepThree from "../assets/Step3.png"
 import stepFour from "../assets/step4.png"
 
 
