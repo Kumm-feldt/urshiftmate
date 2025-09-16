@@ -7,6 +7,9 @@
     margin: 30px 40px;
     margin-bottom: 0;
 }
+.image-container-flex{
+  cursor: pointer;
+}
 .flex-container{
     display: flex;
 }
@@ -230,4 +233,11 @@
     background: var(--bg);
     font-family: var(--font);
     padding: 4rem 0;
+}
+
+/* step images */
+.step-img{
+  width: 400px;
+  height: auto;
+  margin: auto;
 }
