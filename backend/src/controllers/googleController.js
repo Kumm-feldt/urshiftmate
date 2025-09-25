@@ -313,9 +313,14 @@ async function filterEvents(googleId, eventList){
 
   let filteredData = [];
   try{
-    let user = await User.find({googleId});
-    let jobs = await Workplace.find(user._id);
-  
+    let user = await User.findOne({googleId});
+    if (!user) {
+      console.log('No user found for googleId:', googleId);
+      return filteredData;
+    }
+    
+    let jobs = await Workplace.find({userId: user._id}); 
+    
     if(jobs.length > 0 ){
   
       eventList.forEach((event)=>{
