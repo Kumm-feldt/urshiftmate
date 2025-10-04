@@ -14,32 +14,6 @@ const authHeaders = () => {
 };
 
 
-
-// Not used anymore
-/*
-export async function ensureAuth() {
-  try {
-    const response = await fetch(`${AUTH_API}/status`, {
-            credentials: "include",
-      headers: {
-        ...authHeaders()
-      }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      return { isAuthenticated: data.isAuthenticated, user: data.user };
-    } else {
-      return { isAuthenticated: false };
-    }
-  } catch (e) {
-    console.error('Auth check failed:', e);
-    return { isAuthenticated: false };
-  }
-}
-*/
-
-
 export async function logout() {
   try {
     const response = await fetch(`${API_BASE}/logout`, {
