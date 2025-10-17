@@ -56,6 +56,7 @@ const Dashboard = ({showSidebar = true}) => {
   const [userGenInfo, setUserGenInfo] = useState("")
   const header = ["Job", "Wage", "Hours Worked", "Total"];
   const headerDetailed = ["Job", "Date", "Start Time","End Time",  "Hours Worked"];
+  const [prevWeekPayment, setPrevWeekPayment] = useState([]);
 
 
   const mapStatusToMsg = (e) => {
@@ -73,13 +74,15 @@ const Dashboard = ({showSidebar = true}) => {
     setErrorMsg("");
     try {
       
-      const [detailed, summarized, user] = await Promise.all([
+      const [detailed, summarized, user, prevPayment] = await Promise.all([
         api.fetchDetailedEvents(index),
         api.fetchSummarizedEvents(index),
-        api.fetchUserSummary(index)
+        api.fetchUserSummary(index),
+        api.fetchPaymentPerWeek(calendarIndex-1)
       ]);
       setDetailedEvents(detailed || []);
       setUserInfo(user || null);
+      setPrevWeekPayment(prevPayment)
       await setSummarizedEventsHelper(summarized || [], user);
     } catch (e) {
       setErrorMsg(mapStatusToMsg(e));
@@ -158,7 +161,7 @@ const Dashboard = ({showSidebar = true}) => {
 
 const preTaxMoneyAmount = userInfo?.paycheck || 0;
 const checkDay = userGenInfo?.checkDay || 0;
-
+const previousPayment = prevWeekPayment.taxedPaycheck;
 const startWeekOne = userGenInfo?.startWeekOne || 0;
 const endWeekOne = userGenInfo?.endWeekOne || 0;
 const startWeekTwo = userGenInfo?.startWeekTwo || 0;
@@ -217,7 +220,7 @@ if(userInfo){
           }} className="w-[44px] h-[44px] text-gray-800 arrow-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 12h14M5 12l4-4m-4 4 4 4"/>
               </svg>
-              <Summary date={checkDay} moneyAmount={taxedPaycheck} preTaxMoneyAmount={preTaxMoneyAmount}></Summary>
+              <Summary prev={previousPayment} date={checkDay} moneyAmount={taxedPaycheck} preTaxMoneyAmount={preTaxMoneyAmount}></Summary>
               <svg onClick={() => {
             setCalendarIndex(calendarIndex+1)
           }} className="w-[44px] h-[44px] text-gray-800 arrow-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">

@@ -15,9 +15,13 @@ router.get("/api/existCalendars", asyncHandler(googleController.independentUserS
 
 router.get("/api/detailedEvents",asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.dataCollector), asyncHandler(googleController.getDetailEvents));
 
+router.get("/api/paymentPerWeek",  asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.dataCollector), asyncHandler(googleController.getPaymentPerWeek));
+
 router.get("/api/summaryEvents",  asyncHandler(googleController.independentUserSummary),asyncHandler(googleController.dataCollector),  asyncHandler(googleController.getSummaryEvents));
 
 router.get("/api/summaryUser",  asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.dataCollector), asyncHandler(googleController.getSummaryUser));
+
+
 
 
 
