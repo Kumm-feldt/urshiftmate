@@ -10,6 +10,7 @@ import Policy from "./components/Policy"
 import { AuthContext } from "./AuthContext";
 import Home from "./components/Home";
 import { ThreeDot } from "react-loading-indicators";
+import Instructions from "./components/Instructions";
 
 
 
@@ -64,7 +65,10 @@ const App = () => {
         <Route path="/settings" element={auth.isAuthenticated ? <Settings /> : <Navigate to="/login" />} />
         <Route path="/profile" element={auth.isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/jobs" element={auth.isAuthenticated ? <JobsCalendar /> : <Navigate to="/login" />} />
+        <Route path="/instructions" element={auth.isAuthenticated ? <Instructions /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to={auth.isAuthenticated ? "/dashboard" : "/login"} />} />
+
+        
       </Routes>
     </Router>
     </AuthContext.Provider>

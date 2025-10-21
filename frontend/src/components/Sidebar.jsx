@@ -10,15 +10,16 @@ import { Link } from "react-router-dom"; // Make sure to import Link
 import racoon from "../assets/ico.png" 
 
 
-const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar"];
+const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar", "Instructions"];
 
 const icons = [
 <i className="bi bi-speedometer2"></i>,
 <i className="bi bi-gear"></i>,
 <i className="bi bi-calendar-week"></i> ,
+<i class="bi bi-info-circle"></i>
 ];
 
-const routes = ["/dashboard", "/settings", "/jobs", "/profile"];
+const routes = ["/dashboard", "/settings", "/jobs",  "/instructions","/profile"];
 
 const bottomRoutes = [ "/profile"];
 const bottomIcons = [<i className="bi bi-person-circle"></i>, <i className="bi bi-box-arrow-right"></i>]
@@ -75,10 +76,13 @@ const Sidebar = ()=>{
             >
                 <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 sidebar-div sidebar-wrapper">
                     <div className="icons-top">
-                        <div className="logo-div">
-                        <h2 className="h2-title-sidebar bebas-neue-regular ">U R S H I F T M A T E</h2>
-                        <img src={racoon} alt="log" className="logo-racoon-sidebar" />
-                        </div>
+                            <Link to="/">
+                                <div className="logo-div" >
+                                    <h2 className="h2-title-sidebar bebas-neue-regular ">U R S H I F T M A T E</h2>
+                                    <img src={racoon} alt="log" className="logo-racoon-sidebar" />
+                                </div>
+                            </Link>
+
 
                         <h2 className="h2-title-sidebar">{formattedDate}</h2>
                        

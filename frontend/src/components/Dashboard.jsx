@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useContext } from "react";
-import Table from  "./Table"
+import Table from "./Table"
 import "./Dashboard.css"
 import Sidebar from "./Sidebar";
 import Summary from "./Summary";
 import { AuthContext } from "../AuthContext";
-
-
 import * as api from "../api.js"
 import { ThreeDot } from "react-loading-indicators";
+import { useReactToPrint } from "react-to-print";
+import { useRef } from "react";
+
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 function toggleBar(e) {
@@ -15,7 +17,7 @@ function toggleBar(e) {
     btn.classList.remove("toggle-active")
   );
 
-  document.querySelectorAll(".table-holder").forEach(btn=>
+  document.querySelectorAll(".table-holder").forEach(btn =>
     btn.classList.remove("table-inactive")
   )
 
@@ -23,9 +25,9 @@ function toggleBar(e) {
   let detailedTable = document.getElementById("table-details");
   let summaryTable = document.getElementById("table-summary");
 
-  if(e.target.id == "table-details-btn"){
+  if (e.target.id == "table-details-btn") {
     summaryTable.classList.add("table-inactive");
-  }else if(e.target.id == "table-summary-btn"){
+  } else if (e.target.id == "table-summary-btn") {
     detailedTable.classList.add("table-inactive");
   }
 
@@ -40,7 +42,7 @@ function formatPhrase(phrase, values) {
 }
 
 
-const Dashboard = ({showSidebar = true}) => {
+const Dashboard = ({ showSidebar = true }) => {
   // 1) check status from the Context
   const { auth } = useContext(AuthContext);
 
@@ -55,8 +57,13 @@ const Dashboard = ({showSidebar = true}) => {
   const [calendarExists, setCalendarExists] = useState(false)
   const [userGenInfo, setUserGenInfo] = useState("")
   const header = ["Job", "Wage", "Hours Worked", "Total"];
-  const headerDetailed = ["Job", "Date", "Start Time","End Time",  "Hours Worked"];
+  const headerDetailed = ["Job", "Date", "Start Time", "End Time", "Hours Worked"];
   const [prevWeekPayment, setPrevWeekPayment] = useState([]);
+
+
+
+  const contentRef = useRef(null);
+  const reactToPrintFn = useReactToPrint({ contentRef });
 
 
   const mapStatusToMsg = (e) => {
@@ -64,7 +71,7 @@ const Dashboard = ({showSidebar = true}) => {
     if (e.status === 401) return "Please connect your Google account to continue.";
     if (e.status === 400) return "Missing or invalid parameters. Please try again.";
     if (e.status === 404) return "No events found for the selected dates.";
-    if (e.status === 0)   return "You're offline or the server is unreachable.";
+    if (e.status === 0) return "You're offline or the server is unreachable.";
     return e.message || "Something went wrong. Please try again later.";
   };
 
@@ -73,12 +80,12 @@ const Dashboard = ({showSidebar = true}) => {
     setLoading(true);
     setErrorMsg("");
     try {
-      
+
       const [detailed, summarized, user, prevPayment] = await Promise.all([
         api.fetchDetailedEvents(index),
         api.fetchSummarizedEvents(index),
         api.fetchUserSummary(index),
-        api.fetchPaymentPerWeek(calendarIndex-1)
+        api.fetchPaymentPerWeek(calendarIndex - 1)
       ]);
       setDetailedEvents(detailed || []);
       setUserInfo(user || null);
@@ -99,8 +106,8 @@ const Dashboard = ({showSidebar = true}) => {
 
   const existsCal = async () => {
     const exists = await api.calendarExists();
-    setCalendarExists(exists);  
-   return (exists) ? true : false;
+    setCalendarExists(exists);
+    return (exists) ? true : false;
   }
 
 
@@ -109,29 +116,29 @@ const Dashboard = ({showSidebar = true}) => {
     let alive = true;
 
     (async () => {
-   // AuthContext already handles auth, so just check if authenticated
+      // AuthContext already handles auth, so just check if authenticated
       if (!auth.isAuthenticated) {
         if (!alive) return;
         window.location.replace("/login");
         return;
       }
-    // 2) check calendars
-    const exists = await existsCal();
-    if (!alive) return;
+      // 2) check calendars
+      const exists = await existsCal();
+      if (!alive) return;
 
 
-    // 3) fetch General User Info
-    await fetchUInfo(calendarIndex)
+      // 3) fetch General User Info
+      await fetchUInfo(calendarIndex)
 
-    // 4) only fetch if calendars exist
-    if (exists) {
-      await fetchData(calendarIndex);
-    } else {
-      setDetailedEvents([]);
-      setSummarizedEvents([]);
-      setUserInfo(null);
-    }
-    setLoading(false)
+      // 4) only fetch if calendars exist
+      if (exists) {
+        await fetchData(calendarIndex);
+      } else {
+        setDetailedEvents([]);
+        setSummarizedEvents([]);
+        setUserInfo(null);
+      }
+      setLoading(false)
 
     })();
 
@@ -143,7 +150,7 @@ const Dashboard = ({showSidebar = true}) => {
     (async () => {
       if (calendarIndex !== 0 || userInfo) {
         const exists = await existsCal();
-        
+
         if (exists) {
           await fetchData(calendarIndex);
         }
@@ -159,108 +166,144 @@ const Dashboard = ({showSidebar = true}) => {
 
 
 
-const preTaxMoneyAmount = userInfo?.paycheck || 0;
-const checkDay = userGenInfo?.checkDay || 0;
-const previousPayment = prevWeekPayment.taxedPaycheck;
-const startWeekOne = userGenInfo?.startWeekOne || 0;
-const endWeekOne = userGenInfo?.endWeekOne || 0;
-const startWeekTwo = userGenInfo?.startWeekTwo || 0;
-const endWeekTwo = userGenInfo?.endWeekTwo || 0;
-const taxedPaycheck = userInfo?.taxedPaycheck || 0;
+  const preTaxMoneyAmount = userInfo?.paycheck || 0;
+  const checkDay = userGenInfo?.checkDay || 0;
+  const previousPayment = prevWeekPayment.taxedPaycheck;
+  const startWeekOne = userGenInfo?.startWeekOne || 0;
+  const endWeekOne = userGenInfo?.endWeekOne || 0;
+  const startWeekTwo = userGenInfo?.startWeekTwo || 0;
+  const endWeekTwo = userGenInfo?.endWeekTwo || 0;
+  const taxedPaycheck = userInfo?.taxedPaycheck || 0;
 
 
-    async function setSummarizedEventsHelper(data, user){
-        let amount = Number(user?.paycheck || 0);
-        const localType = amount < 100 ? "negative" : "positive";
+  async function setSummarizedEventsHelper(data, user) {
+    let amount = Number(user?.paycheck || 0);
+    const localType = amount < 100 ? "negative" : "positive";
 
-        setType(localType)
-        setSummarizedEvents(data)
+    setType(localType)
+    setSummarizedEvents(data)
 
-        try {
-          // call backend to get a phrase
-          const res = await api.randomPhrase(localType);
-          if (res && res.phrase) {
-            setPhrase(res.phrase);   // update state
-          }
-        } catch (err) {
-          console.error("Error fetching random phrase:", err);
-        }
+    try {
+      // call backend to get a phrase
+      const res = await api.randomPhrase(localType);
+      if (res && res.phrase) {
+        setPhrase(res.phrase);   // update state
+      }
+    } catch (err) {
+      console.error("Error fetching random phrase:", err);
+    }
   }
 
 
 
-let formattedPhrase;
-if(userInfo){
- formattedPhrase= formatPhrase(phrase, {
-  name: userGenInfo?.username || "sir",
-  hours: userInfo?.totalHours || 0,
-  payDate: userInfo?.checkDay || Date.now(), 
-  earnings: `$${userInfo?.taxedPaycheck}` || 0,
-  goalHours: 40
-});
-}
+  let formattedPhrase;
+  if (userInfo) {
+    formattedPhrase = formatPhrase(phrase, {
+      name: userGenInfo?.username || "sir",
+      hours: userInfo?.totalHours || 0,
+      payDate: userInfo?.checkDay || Date.now(),
+      earnings: `$${userInfo?.taxedPaycheck}` || 0,
+      goalHours: 40
+    });
+  }
 
 
   return (
 
     <div>
-      
 
-     
+
+
 
       {showSidebar && <Sidebar></Sidebar>}
-          {/* Google Calendar Events */}
+      {/* Google Calendar Events */}
 
-          <div className="dashboard-div-container">
-              <h1 className="h1-title-table">{formattedPhrase} </h1>
-              <div className="summary-container">
+      <div className="dashboard-div-container">
+        <h1 className="h1-title-table">{formattedPhrase} </h1>
+        <div className="summary-container">
 
-              <svg onClick={() => {
-            setCalendarIndex(calendarIndex-1)
+          <svg onClick={() => {
+            setCalendarIndex(calendarIndex - 1)
           }} className="w-[44px] h-[44px] text-gray-800 arrow-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 12h14M5 12l4-4m-4 4 4 4"/>
-              </svg>
-              <Summary prev={previousPayment} date={checkDay} moneyAmount={taxedPaycheck} preTaxMoneyAmount={preTaxMoneyAmount}></Summary>
-              <svg onClick={() => {
-            setCalendarIndex(calendarIndex+1)
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 12h14M5 12l4-4m-4 4 4 4" />
+          </svg>
+          <Summary prev={previousPayment} date={checkDay} moneyAmount={taxedPaycheck} preTaxMoneyAmount={preTaxMoneyAmount}></Summary>
+          <svg onClick={() => {
+            setCalendarIndex(calendarIndex + 1)
           }} className="w-[44px] h-[44px] text-gray-800 arrow-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 12H5m14 0-4 4m4-4-4-4"/>
-              </svg>
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 12H5m14 0-4 4m4-4-4-4" />
+          </svg>
 
 
 
-              </div>
+        </div>
+        {/* ################ CURRENT BUTTON ####################### */}
+        <div className="buttons-dashboard">
 
-              {/* ################ TOGGLE BAR ####################### */}
-              <div className="dashboard-middle">
-                    <div className="dashboard-toggle-bar">
-                      <div id="table-details-btn" className="dashboard-toggle d-t-details" onClick={toggleBar} >Details</div>
-                      <div id="table-summary-btn" className="dashboard-toggle d-t-summary toggle-active" onClick={toggleBar}>Summary</div>
-                    </div>
+          <button onClick={() => {
+            setCalendarIndex(0)
+          }}
+            className="current-btn">
+            Current
+          </button>
+          <div>
 
-                  
-                    <div id="table-summary" className="table-holder">
-                      <h2 className="h2-title-table">Hours from {startWeekOne} to {endWeekOne} </h2>
-                       <Table columns={header} data={summEvents.first} renderType={"Summary"}></Table>
-                 
-                        <h2 className="h2-title-table">Hours from {startWeekTwo} to {endWeekTwo} </h2>
-                       <Table columns={header} data={summEvents.second} renderType={"Summary"}></Table>
-                    </div>
+            <button className="current-btn" onClick={reactToPrintFn}><i class="bi bi-printer-fill"></i>
+            </button>
+          </div>
 
-                    <div id="table-details" className="table-holder table-inactive ">
-                      <h2 className="h2-title-table">Hours from {startWeekOne} to {endWeekOne} </h2>
-                      <Table columns={headerDetailed} data={detEvents.first} renderType={"Detailed"}></Table>
+        </div>
 
-                      <h2 className="h2-title-table">Hours from {startWeekTwo} to {endWeekTwo} </h2>
-                      <Table columns={headerDetailed} data={detEvents.second} renderType={"Detailed"}></Table>
-                    </div>
-            </div>
+
+        {/* ################ TOGGLE BAR ####################### */}
+        <div className="dashboard-middle">
+          <div className="dashboard-toggle-bar">
+            <div id="table-details-btn" className="dashboard-toggle d-t-details" onClick={toggleBar} >Details</div>
+            <div id="table-summary-btn" className="dashboard-toggle d-t-summary toggle-active" onClick={toggleBar}>Summary</div>
           </div>
 
 
+          <div id="table-summary" className="table-holder">
+            <h2 className="h2-title-table">Hours from {startWeekOne} to {endWeekOne} </h2>
+            <Table columns={header} data={summEvents.first} renderType={"Summary"}></Table>
 
+            <h2 className="h2-title-table">Hours from {startWeekTwo} to {endWeekTwo} </h2>
+            <Table columns={header} data={summEvents.second} renderType={"Summary"}></Table>
+          </div>
 
+          <div ref={contentRef} id="table-details" className="print-area table-holder table-inactive ">
+            {/* ################ HIDDEN HEADER ####################### */}
+            <div className="print-header">
+              <p className="title-header">Summary of Hours - UrShiftmate.com</p>
+              <table className="header-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Date Range</th>
+                    <th>Expected Amount</th>
+                    <th>Paydate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>{userGenInfo.username}</td><td>{startWeekOne} - {endWeekTwo}</td><td>${taxedPaycheck}</td><td>{checkDay}</td></tr>
+                </tbody>
+              </table>
+              <p>*The paycheck amounts shown are estimates based on the user’s input and personal calendar data. <br></br> This tool is intended for personal reference only and does not reflect official payroll records or guarantees of actual compensation.</p>
+            </div>
+
+            <h2 className="h2-title-table">Hours from {startWeekOne} to {endWeekOne} </h2>
+            <Table columns={headerDetailed} data={detEvents.first} renderType={"Detailed"}></Table>
+
+            <h2 className="h2-title-table">Hours from {startWeekTwo} to {endWeekTwo} </h2>
+            <Table columns={headerDetailed} data={detEvents.second} renderType={"Detailed"}></Table>
+          </div>
+        </div>
+      </div>
     </div>
+
+
+
+
   );
 };
 

@@ -1,0 +1,9 @@
+    .flex-row{
+        justify-content:space-around;
+    }
+
+@media (min-width: 1500px) {
+        .flex-row{
+        justify-content:center;
+    }
+}
