@@ -2,39 +2,43 @@
 .login-wrapper {
   display: flex;
   justify-content: center;
-  align-items: start;
+  align-items: center;
   height: 100vh;
   background: #00000069;
   margin-top: 20px;
 }
 
+/* container holds image + form side-by-side */
 .login-sub-wrapper {
-  position: relative;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  gap: 2rem; /* space between form and image */
+  position: relative;
 }
 
 /* --- Image --- */
 .login-img {
-  margin-top: 80px;
-  width: auto;
-  height: 550px;
+  width: 500px;
+  height: auto;
   object-fit: cover;
   border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
 
-/* --- Form Card (slightly over the image) --- */
+/* --- Form Card --- */
 .login-form {
-  position: absolute;
-  bottom: -165px; /* move slightly over image */
+  position: relative;
+  z-index: 2;
   background-color: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  padding: 2rem;
   width: 100%;
-  max-width: 28rem;
+  max-width: 26rem;
+  margin-left: -120px; /* makes form slightly overlap the image */
 }
 
 /* --- Text --- */
@@ -96,21 +100,28 @@ h5 {
 }
 
 /* --- Responsive --- */
-@media (max-width: 500px) {
+@media (max-width: 800px) {
+  .login-sub-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
   .login-img {
-    height: 350px;
+    width: 90%;
+    height: auto;
+    margin: -100px;
   }
 
   .login-form {
-    bottom: -130px;
-    max-width: 90%;
-    padding: 1rem;
+    margin-left: 0;
+    max-width: 80%;
   }
 
   .text-xl {
     font-size: 26px;
   }
-  .text-login{
+
+  .text-login {
     display: none;
   }
 
