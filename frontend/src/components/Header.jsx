@@ -1,11 +1,11 @@
-import racoon from "../assets/ico.png" 
+import racoon from "../assets/ico2.png" 
 import { Link } from "react-router-dom";
 
 const Header = ()=>{
 return(
     <div className="header-flex">
         <div className="image-container-flex">
-            <img src={racoon} alt="logo" />
+            <img width="52px" height="52px" src={racoon} alt="logo" />
             <h3 className="header-title">UrshiftMate</h3>
         </div>
         <div className="flex-container">

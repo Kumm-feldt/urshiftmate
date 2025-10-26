@@ -484,7 +484,7 @@ async function getIndependentUserSummary(req, res, next){
 
 
 
-async function summaryUser(summaryEvents, dates, username){
+async function summaryUser(summaryEvents, dates, username, taxPercent = 10.05){
   try{
     let data = {
       username: username,
@@ -508,8 +508,10 @@ async function summaryUser(summaryEvents, dates, username){
       }
       
     }
-    data.taxedPaycheck = (data.paycheck * 0.8898395722).toFixed(2);
-    data.paycheck = data.paycheck.toFixed(2)
+    const gross = data.paycheck;
+    const net = gross * (1 - taxPercent / 100);
+    data.taxedPaycheck = net.toFixed(2);
+    data.paycheck = gross.toFixed(2)
     return data;
 
   }catch(err){

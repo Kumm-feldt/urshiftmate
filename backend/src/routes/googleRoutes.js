@@ -22,7 +22,4 @@ router.get("/api/summaryEvents",  asyncHandler(googleController.independentUserS
 router.get("/api/summaryUser",  asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.dataCollector), asyncHandler(googleController.getSummaryUser));
 
 
-
-
-
 module.exports = router;

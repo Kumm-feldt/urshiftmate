@@ -2,6 +2,7 @@ import React from "react";
 import "./Login.css"
 import googleLogo from "../assets/google-logo.png" 
 import Header from "./Header";
+import login from "../assets/login3.png"
 
 // Ensure environment variable is correctly accessed
 const API_URL = import.meta.env.VITE_API_URL;
@@ -26,30 +27,31 @@ const formInput = <>        <div>
     <Header></Header>
 
 <div className="login-wrapper">
+  <div className="login-sub-wrapper">
+    <img className="login-img" src={login} alt="login-image" />
 
+    <div className="login-form">
+      <form className="space-y-6" action="#">
+        <h4 className="text-xl">The raccoon’s been busy!</h4>
+        <p className="text-login">
+          Log in to see how many hours you worked, how much you made, and when payday’s coming.
+          
+        </p>
 
+        <h5>Sign in to UrshiftMate</h5>
 
-<div className="d-height w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-    <form className="space-y-6" action="#">
-
-        <h5 className="text-xl font-medium text-gray-900 dark:text-white">Sign in to UrshiftMate</h5>
-      
-        <div className="text-sm font-medium text-gray-500 dark:text-gray-300">
-            Not registered? <a href={googleAuthUrl} className="text-blue-700 hover:underline dark:text-blue-500">Create account</a>
+        <div className="login-options">
+          <div className="circle-logo">
+            <a className="a-link-login-google" href={googleAuthUrl}>
+              <img src={googleLogo} className="google-icon" alt="google" /> Continue with Google
+            </a>
+          </div>
         </div>
-        <div className="login-options text-sm font-medium">
-            <p className="login-text">Or continue with</p>
-            <div className="circle-logo">
-                <a href={googleAuthUrl}>
-                    <img src={googleLogo} className="google-icon" alt="google" />
-                </a>
-            </div>
-            
-        </div>
-        
-    </form>
+      </form>
+    </div>
+  </div>
 </div>
-</div>
+
   </>
   
   );
