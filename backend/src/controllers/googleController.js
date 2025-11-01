@@ -172,8 +172,6 @@ async function deleteWorkplace (req, res){
 }
 
 
-
-
 // #### ADD CALENDAR ####
 async function addCalendar(req, res){
   let googleId = req.userInfo?.googleId;
@@ -246,7 +244,6 @@ async function getGoogleCalendars(req, res, next){
 
 }
 
-// !===================== modify this function to obtain data from other calendars as well ===========
 // Updated getEvents function with timezone
 async function getEvents(googleId, dates, week, timezone = "America/Chicago") {
   let startDate = new Date();
@@ -267,7 +264,7 @@ async function getEvents(googleId, dates, week, timezone = "America/Chicago") {
     let activeCalendars = user?.calendars || [];
 
     if (activeCalendars.length === 0) {
-      return null;
+      return allEvents;
     }
 
     if (!refreshToken) {
@@ -295,6 +292,8 @@ async function getEvents(googleId, dates, week, timezone = "America/Chicago") {
     throw new Error(`Error fetching events: ${error}`);
   }
 }
+
+
 function filterDateEvents(startDateTime, endDateTime, timezone = "America/Chicago") {
   const startDate = moment.tz(startDateTime, timezone);
   const endDate = moment.tz(endDateTime, timezone);
@@ -309,13 +308,69 @@ function filterDateEvents(startDateTime, endDateTime, timezone = "America/Chicag
   return `${startStr} - ${endStr}`;
 }
 
+async function getPaycheckInfo(googleId, eventList){
+    let filteredData = {
+      totalWage: 0,
+      totalHours:0,
+      taxedPaycheck: 0
+
+    };
+  try{
+    let user = await User.findOne({googleId});
+    if (!user) {
+      console.log('No user found for googleId:', googleId);
+      return filteredData;
+    }
+    
+    let jobs = await Workplace.find({userId: user._id}); 
+    
+    if(jobs.length > 0 ){
+  
+      eventList.forEach((event)=>{
+        if(event.summary && event.summary.toLowerCase().includes("shift")){
+  
+         jobs.forEach((job)=>{
+  
+          if(event.summary.toLowerCase().includes(job.workplace.toLowerCase())){
+            const startMoment = moment.tz(event.start.dateTime, userTimezone);
+            const endMoment = moment.tz(event.end.dateTime, userTimezone);
+            let totalHours = endMoment.diff(startMoment, 'hours', true);
+            let totalWage = totalHours * job.hourlyRate;
+  
+            filteredData.totalWage += Math.round(totalWage * 100)/100;
+            filteredData.totalHours += Math.round(totalHours * 100) / 100;
+            filteredData.taxedPaycheck += Math.round(totalWage * 100)/100;
+          }
+         })
+    
+        }
+      })
+    }
+    
+  
+  }catch(err){
+    throw new Error(`Error Filtering Events ${err}`);
+
+  }
+
+    return filteredData;
+ 
+
+}
+
+
 async function filterEvents(googleId, eventList){
 
   let filteredData = [];
   try{
-    let user = await User.find({googleId});
-    let jobs = await Workplace.find(user._id);
-  
+    let user = await User.findOne({googleId});
+    if (!user) {
+      console.log('No user found for googleId:', googleId);
+      return filteredData;
+    }
+    
+    let jobs = await Workplace.find({userId: user._id}); 
+    
     if(jobs.length > 0 ){
   
       eventList.forEach((event)=>{
@@ -360,37 +415,37 @@ async function filterEvents(googleId, eventList){
 
 async function summaryEvents(filteredEvents){
 
-try{
-  let summaryOfEvents = [];
-  let existingSummary;
-  filteredEvents.forEach((event)=>{
+    try{
+      let summaryOfEvents = [];
+      let existingSummary;
+      filteredEvents.forEach((event)=>{
 
-    if(summaryOfEvents.length > 0){
-      existingSummary = summaryOfEvents.find(
-        briefEvent => briefEvent.workplace.toLowerCase() === event.workplace.toLowerCase()
-      );
-    }
+        if(summaryOfEvents.length > 0){
+          existingSummary = summaryOfEvents.find(
+            briefEvent => briefEvent.workplace.toLowerCase() === event.workplace.toLowerCase()
+          );
+        }
 
-    if (existingSummary){
-      existingSummary.totalWage += event.totalWage;
-      existingSummary.totalHours += event.totalHours;
-    }else{
-      summaryOfEvents.push({
-        workplace : event.workplace,
-        wage : event.wage,
-        totalWage : event.totalWage, 
-        totalHours : event.totalHours
+        if (existingSummary){
+          existingSummary.totalWage += event.totalWage;
+          existingSummary.totalHours += event.totalHours;
+        }else{
+          summaryOfEvents.push({
+            workplace : event.workplace,
+            wage : event.wage,
+            totalWage : event.totalWage, 
+            totalHours : event.totalHours
+          })
+        }
+
+      
       })
+
+      return summaryOfEvents;
+    }catch(err){
+      throw new Error(`Error Filtering Events ${err}`);
+
     }
-
-   
-  })
-
-  return summaryOfEvents;
-}catch(err){
-  throw new Error(`Error Filtering Events ${err}`);
-
-}
 
 
 }
@@ -427,7 +482,9 @@ async function getIndependentUserSummary(req, res, next){
     return res.json(res.locals.independentUserSummary);
 }
 
-async function summaryUser(summaryEvents, dates, username){
+
+
+async function summaryUser(summaryEvents, dates, username, taxPercent = 10.05){
   try{
     let data = {
       username: username,
@@ -451,8 +508,10 @@ async function summaryUser(summaryEvents, dates, username){
       }
       
     }
-    data.taxedPaycheck = (data.paycheck * 0.8898395722).toFixed(2);
-    data.paycheck = data.paycheck.toFixed(2)
+    const gross = data.paycheck;
+    const net = gross * (1 - taxPercent / 100);
+    data.taxedPaycheck = net.toFixed(2);
+    data.paycheck = gross.toFixed(2)
     return data;
 
   }catch(err){
@@ -462,6 +521,13 @@ async function summaryUser(summaryEvents, dates, username){
  
 
 }
+
+function calculateTax(data, tax){
+  return (data * tax).toFixed(2);
+}
+
+
+
 function httpError(statusCode, message) {
   const e = new Error(message);
   e.statusCode = statusCode;
@@ -526,8 +592,6 @@ async function dataCollector(req, res, next){
           secondWeekFilteredData = await filterEvents(googleId, secondWeekEvents);
         }
 
-
-
         res.locals.filteredData = {
           "first" : firstWeekFilteredData,
           "second" : secondWeekFilteredData
@@ -571,6 +635,27 @@ async function getSummaryUser(req, res){
   res.json(summaryUser);
 }
 
+async function getPaymentPerWeek(req, res){
+
+  const googleId = req.userInfo.googleId;
+  const username =res.locals.username;
+  const dates = getDates(req.query.index);
+
+  // Obtain an object with the start/end dates from each week with the index (index 0 = current date). 
+  // It is retrieved from a JSON file 
+  const dateObject = res.locals.dates;
+
+  // obtain a list of events from the active calendars (in DB) and according to the week prompted
+  const firstWeekEvents = await getEvents( googleId, dateObject, "first");
+  const secondWeekEvents = await getEvents( googleId, dateObject, "second");
+
+  const allEvents = firstWeekEvents.concat(secondWeekEvents);
+
+  const filteredEvents = await getPaycheckInfo(googleId, allEvents);
+
+  res.json(filteredEvents);
+}
+
 async function getCalendars(req, res){
   let calendars = res.locals.googleCalendarList;
   res.json(calendars);
@@ -594,5 +679,5 @@ async function getActiveCalendars(req, res){
 
 
 module.exports = {getSummaryEvents, getDetailEvents, dataCollector, getSummaryUser, getGoogleCalendars, getCalendars, getActiveCalendars,
-  addCalendar, deleteCalendar, existCalendarsInDb, independentUserSummary, getIndependentUserSummary, deleteWorkplace
+  addCalendar, deleteCalendar, existCalendarsInDb, independentUserSummary, getIndependentUserSummary, deleteWorkplace, getPaymentPerWeek
 }

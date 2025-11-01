@@ -1,16 +1,18 @@
 :root {
-  --main-bg-color: brown;
+    --main-bg-color: brown;
 }
 
 
-.table-holder{
-    width: 700px ;
+.table-holder {
+    width: 700px;
 }
-.no-data-p{
+
+.no-data-p {
     margin-top: 25px;
     text-align: center;
 }
-.dashboard-div-container{
+
+.dashboard-div-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -18,14 +20,37 @@
 
 }
 
+.print-header {
+    display: none;
+}
 
+.header-table {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: left;
+}
 
-.table-holder{
+.header-table th,
+.header-table td {
+    border: 1px solid #000;
+    padding: 6px 10px;
+}
+
+.buttons-dashboard{
+    display: flex;
+}
+.buttons-dashboard button{
+    margin-left: 5px;
+    margin-right: 5px;
+
+}
+
+.table-holder {
     margin-top: 10px;
     border-radius: 10px;
 }
 
-.h2-title-table{
+.h2-title-table {
     font-family: "Roboto", sans-serif;
     border-bottom: 3px solid black;
     text-align: center;
@@ -34,7 +59,8 @@
     font-weight: 500;
     padding-bottom: 13px;
 }
-.h1-title-table{
+
+.h1-title-table {
     font-family: "Roboto", sans-serif;
     margin: 20px 20px 10px;
     font-size: 25px;
@@ -45,8 +71,8 @@
 }
 
 
-.dashboard-toggle-bar{
-    margin-top: 50px;
+.dashboard-toggle-bar {
+    margin-top: 35px;
     display: flex;
     color: #00122c;
     background-color: #f4f7fb;
@@ -56,14 +82,14 @@
 
 }
 
-.toggle-active{
+.toggle-active {
     color: white;
     background-color: #00122c;
     border-radius: 20px;
 
 }
 
-.dashboard-toggle{
+.dashboard-toggle {
     width: 50%;
     text-align: center;
     padding: 5px;
@@ -72,33 +98,106 @@
 
 }
 
-.table-inactive{
+.table-inactive {
     display: none;
 }
 
-.dashboard-middle .table-container{
-        width: 700px;
+.dashboard-middle .table-container {
+    width: 700px;
 }
 
-.jobs-table-container{
-        width: 320px !important;
+.jobs-table-container {
+    width: 320px !important;
 }
 
-.loading{
+.loading {
     display: flex;
     justify-content: center;
     align-items: center;
-   height: 800px;
+    height: 800px;
 }
 
 
-.summary-container{
+.summary-container {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 900px;
 }
 
-.arrow-i{
+.arrow-i {
     cursor: pointer;
+}
+
+.current-btn {
+    text-decoration: none;
+    padding: 5px 25px;
+    margin-top: 20px;
+    border-radius: 15px;
+    background-color: #00122c;
+    color: #f4f7fb;
+    font-family: "Roboto", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+
+}
+
+.current-btn:hover {
+    background-color: #f4f7fb;
+    color: #00122c;
+
+}
+
+/* Hide things that shouldn't appear when printing */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .print-area,
+    .print-area * {
+        visibility: visible;
+    }
+
+    /* Ensure the printed area starts at the top */
+    .print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    #table-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: auto;
+    }
+
+    /* Show only the print header on paper */
+    .print-header {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 10px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .header-table {
+        width: 500px;
+    }
+
+    .title-header {
+        font-size: 20px;
+        margin: 20px 0;
+    }
+
+    .py-4 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
 }

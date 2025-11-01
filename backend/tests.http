@@ -1,16 +1,5 @@
 @url = https://urshiftmate.onrender.com/user/config
-@devUrl = http://localhost:8000/user/config
-@devBaseUrl = http://localhost:8000
-
-### 
-POST {{devBaseUrl}}/clock/user
-Content-Type: application/json
-{
-
-    "firstName": "Anthony",
-    "lastName": "Kummerfeldt",
-    "pin" : 1833
-}
+@devUrl = http://localhost:8000/api/paymentPerWeek?index=-1
 
 ###
 POST {{url}}/user/config/workplace

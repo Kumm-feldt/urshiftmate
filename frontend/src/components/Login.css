@@ -1,94 +1,128 @@
-/* Center the login wrapper */
+/* --- Layout --- */
 .login-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;        /* Full viewport height */
-  background: #f8f9fa;  /* Light background in light mode */
+  height: 100vh;
+  background: #00000069;
+  margin-top: 20px;
 }
 
-  
-
-.text-xl{
-    font-size: 33px !important;
-    font-weight: 700 !important;
-}
-form{
-    background-color: #00000069;
-    border: none;
+/* container holds image + form side-by-side */
+.login-sub-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem; /* space between form and image */
+  position: relative;
 }
 
-.space-y-6 h5{
-  color: #f8f9fa;
+/* --- Image --- */
+.login-img {
+  width: 500px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
 
-/* Improve the card container */
-.login-wrapper .dark\:bg-gray-800 {
-  background-color: #000000 !important; /* Slightly lighter than pure black */
-  border-color: #3a3a3a !important;
+/* --- Form Card --- */
+.login-form {
+  position: relative;
+  z-index: 2;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  padding: 2rem;
+  width: 100%;
+  max-width: 26rem;
+  margin-left: -120px; /* makes form slightly overlap the image */
 }
 
-/* Input fields */
-.login-wrapper input {
-  transition: background 0.2s, border 0.2s;
+/* --- Text --- */
+.text-xl {
+  font-size: 33px;
+  font-weight: 700;
+  color: #00122c;
 }
 
-@media (prefers-color-scheme: dark) {
-  .login-wrapper input {
-    background-color: #333 !important;
-    border-color: #444 !important;
-    color: #fff !important;
-  }
-
-  .login-wrapper input::placeholder {
-    color: #aaa !important;
-  }
+h5 {
+  color: #00122c;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
-/* Buttons */
-.login-wrapper button {
-  transition: background 0.2s, transform 0.1s;
+.text-login {
+  color: #333;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
 }
 
-.login-wrapper button:hover {
-  transform: translateY(-1px);
-}
-.google-icon{
-    width: 30px;
-    height: auto;
+/* --- Google Login Button --- */
+.login-options {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
 }
 
-.circle-logo{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    border-radius: 40px;
-    background-color: #4444446f;
+.circle-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 220px;
+  height: 50px;
+  border-radius: 40px;
+  background-color: #fff;
+  color: #00122c;
+  border: 1px solid #00122c;
+  transition: all 0.2s ease;
 }
-.login-options{
-    color: rgba(255, 255, 255, 0.666);
-    display: flex;
+
+.circle-logo:hover {
+  background-color: #00122c;
+  color: #fff;
+}
+
+.a-link-login-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.google-icon {
+  width: 30px;
+  height: auto;
+  margin-right: 10px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 800px) {
+  .login-sub-wrapper {
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
+    gap: 1rem;
+  }
 
-.login-text{
-    margin-bottom: 15px;
-}
+  .login-img {
+    width: 90%;
+    height: auto;
+    margin: -100px;
+  }
 
-.max-w-sm {
-    max-width: 32rem;
-}
-.d-height{
-    max-height: 700px;
-}
+  .login-form {
+    margin-left: 0;
+    max-width: 80%;
+  }
 
-@media (max-width: 500px) {
-    .max-w-sm{
-        max-width: 20rem
-    }
+  .text-xl {
+    font-size: 26px;
+  }
+
+  .text-login {
+    display: none;
+  }
 
 }

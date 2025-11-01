@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import TableHeader from "./TableHeader";
 import TableBody from "./TableBody";
-import './Table.css';
 import { useState } from "react";
 import * as api from "../api.js"
 

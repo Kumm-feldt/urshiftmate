@@ -25,7 +25,7 @@ const LogoutButton =()=> {
   return (
     <li
       onClick={handleLogout}
-      className="bi bi-box-arrow-right me-2">
+      className="bi sidebar-i bi-box-arrow-right me-2">
       <span className="ms-3">Logout</span>
     </li>
   );

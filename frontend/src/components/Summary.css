@@ -30,23 +30,44 @@
     font-weight: 900;
     color: #00122c;
 }
+.summary-div{
+    display: flex;
+}
+.summary-chart-container{
+ width: 150px;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+    margin-top: 40px;
+    margin-left: 10px;
 
+
+}
+.summary-div-left{
+    margin-right: 20px;
+}
 /*============= Responsive ================ */
 @media(max-width: 500px){
+    .summary-div-left{
+    margin-right: 5px;
+}
+        .summary-chart-container{
+            margin-top: 20px;
+        }
         .summary-div{
-            width: 65vw;
+            width: 90%;
             height: 160px;
             margin-left: 10px;
             margin-right: 10px;
         }
 
         .summary-h5, .summary-date, .summary-pretax-money-amount{
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
         }
 
         .summary-money-amount{
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 800;
         }
         .summary-h5, .summary-date, .summary-money-amount, .summary-pretax-money-amount{
@@ -86,5 +107,7 @@
         .summary-container{
             width: 100%;
         }
+        .summary-chart-container{
+            width: 50px;
+            }
 }
-

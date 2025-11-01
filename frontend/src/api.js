@@ -14,32 +14,6 @@ const authHeaders = () => {
 };
 
 
-
-// Not used anymore
-/*
-export async function ensureAuth() {
-  try {
-    const response = await fetch(`${AUTH_API}/status`, {
-            credentials: "include",
-      headers: {
-        ...authHeaders()
-      }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      return { isAuthenticated: data.isAuthenticated, user: data.user };
-    } else {
-      return { isAuthenticated: false };
-    }
-  } catch (e) {
-    console.error('Auth check failed:', e);
-    return { isAuthenticated: false };
-  }
-}
-*/
-
-
 export async function logout() {
   try {
     const response = await fetch(`${API_BASE}/logout`, {
@@ -58,7 +32,6 @@ export async function logout() {
     return { isAuthenticated: false };
   }
 }
-// ---------------------------------------
 
 function formatDate(inputDate){
     const date = new Date(inputDate);
@@ -78,6 +51,37 @@ function formatDateWeek(isoDate, locale = "en-US"){
   const dt = new Date(y, m - 1, d); // local time constructor (no timezone shift)
   return dt.toLocaleDateString(locale, { month: "long", day: "numeric"});
 
+}
+
+export async function fetchPaymentPerWeek(index){
+  try {
+    const response = await fetch(`${API}/paymentPerWeek?index=${index}`, {
+            credentials: "include",
+      headers: {
+        ...authHeaders()
+      }
+    });
+
+    const data = await response.json().catch(()=>null)
+
+    if(!response.ok){
+      const msg =
+        data?.error?.message ||
+        data?.message ||
+        response.statusText ||
+        "Request failed";
+      const err = new Error(msg);
+      err.status = response.status;
+      err.body = data;
+      throw err;
+    }
+    return data
+
+  } catch (networkErr) {
+    const err = new Error("Network error while fetching events");
+    err.cause = networkErr;
+    err.status = 0;
+    throw err;  }
 }
 
 export async function fetchDetailedEvents (index){

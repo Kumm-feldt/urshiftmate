@@ -10,20 +10,27 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/interaction": "^6.1.15",
     "@fullcalendar/react": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.15",
+    "@mui/material": "^7.3.4",
+    "@mui/x-charts": "^8.14.0",
     "@tailwindcss/postcss": "^4.0.9",
     "bootstrap-icons": "^1.11.3",
     "date-fns": "^4.1.0",
     "flowbite": "^3.1.2",
+    "lucide-react": "^0.546.0",
     "react": "^19.0.0",
     "react-big-calendar": "^1.19.4",
     "react-calendar": "^6.0.0",
-    "react-dom": "^19.0.0",
+    "react-dom": "^19.2.0",
+    "react-google-charts": "^5.2.1",
     "react-loading-indicators": "^1.0.1",
     "react-router-dom": "^7.4.0",
+    "react-to-print": "^3.2.0",
     "wouter": "^3.7.0"
   },
   "devDependencies": {
