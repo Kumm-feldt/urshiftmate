@@ -98,7 +98,7 @@ exports.oAuth2CallbackHandler = async (req, res) => {
       { expiresIn: '14d' }
     );
     // Redirect with token as query parameter
-
+console.log("TOKE:", jwtToken)
     res.redirect(`${red_uri_frontend}/auth-success?token=${jwtToken}`);
 
 } catch (error) {

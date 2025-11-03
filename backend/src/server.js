@@ -1,16 +1,13 @@
 const http = require('http')
 const app = require("./app.js");
 const config = require("./config/config.js")
-const logger =  require("./logger.js")
+const logger = require("./logger.js")
 
 // database
 const db = require('./db.js')
 
-
 // Create the server
 const server = http.createServer(app);
-
-
 
 // Call it the same way, but only pass config in dev
 if (process.env.MODE === "dev") {

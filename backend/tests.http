@@ -1,23 +1,42 @@
-@url = https://urshiftmate.onrender.com/user/config
-@devUrl = http://localhost:8000/api/paymentPerWeek?index=-1
+@googleRouter = https://urshiftmate.onrender.com/google/api
+@devRouter = http://localhost:8000/google/api
+@token = 
 
 ###
-POST {{url}}/user/config/workplace
+# POST request to set workplace configuration
+POST {{googleRouter}}/user/config/workplace
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-
     "workplace": "PS",
     "hourlyRate": 11,
-    "userId" : "6802a8e6a69534b1170d28a5"
+    "userId": "6802a8e6a69534b1170d28a5"
 }
 
+# Return values: username, checkDay, startWeekOne, endWeekOne, startWeekTwo, endWeekTwo
 ###
-GET {{url}}
+# GET request to fetch user info
+GET {{devRouter}}/user/info?index=0
+Authorization: Bearer {{token}}
 
 ###
-GET {{url}}/create/setup
-
+# Return values: calendarExists: <bool>
+GET {{devRouter}}/existCalendars
+Authorization: Bearer {{token}}
 
 ###
-DELETE {{url}}devUrl/:workplaceId
+GET {{devRouter}}/detailedEvents?index=0
+Authorization: Bearer {{token}}
+
+###
+GET {{devRouter}}/paymentPerWeek?index=0
+Authorization: Bearer {{token}}
+
+###
+GET {{devRouter}}/summaryEvents?index=0
+Authorization: Bearer {{token}}
+###
+GET {{devRouter}}/summaryUser?index=0
+Authorization: Bearer {{token}}
+

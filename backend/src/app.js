@@ -11,12 +11,13 @@ const userConfigRoutes = require("./routes/crudRoutes.js")
 const config = require("./config/config")
 
 let cors_origins;
+
 if(process.env.MODE == "dev"){
   cors_origins = process.env.CORS_LINK;
 }else{
   cors_origins = [
-      "https://urshiftmate.com",      // Remove www version
-      "https://www.urshiftmate.com",  // Keep www version
+      "https://urshiftmate.com",      
+      "https://www.urshiftmate.com", 
       "https://urshiftmate.vercel.app"
   ]
 }
@@ -29,9 +30,7 @@ const sessionFileStore = require('session-file-store');
 const { logout } = require("./controllers/authController.js");
 const FileStore = sessionFileStore(expressSession)
 
-
 const cookieParser = require('cookie-parser');
-
 
 app.use(express.json());
 app.use(cookieParser());
@@ -45,9 +44,6 @@ app.use(cors({
 
 
 app.use("/auth", authRoutes);
-
-
-
 app.use("/google", googleRoutes);
 app.use("/user/config", userConfigRoutes);
 app.use("/logout", logout);
@@ -74,6 +70,7 @@ app.use((err, req, res, next) => {
   console.error("Global Error:", err);
   res.status(500).json({ error: err.message || "Internal Server Error" });
 });
+
 // Endpoint to get session userId
 app.get("/user/session", (req, res) => {
   res.json({ userId: req.userInfo.googleId || null });

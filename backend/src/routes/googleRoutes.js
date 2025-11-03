@@ -6,8 +6,29 @@ const { verifyJWT } = require("../middlewares/jwtMiddleware");
 
 const router = express.Router();
 
-// returns true or false if there is calendars in db if it is true do not call the other endpoints (in the frontend)
+// +++++++ JWT verification +++++++
 router.use("/api", verifyJWT)
+
+// Proposed RESTful Routes
+// GET /users/:userId -> user/info
+
+
+// GET /users/:userId/summary
+
+
+// GET /users/:userId/events
+
+
+// GET /users/:userId/events/:week
+
+
+// GET /users/:userId/calendars
+
+
+
+
+
+
 // I avoided using .use() because it needs to access ?index query param 
 router.get("/api/user/info", asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.getIndependentUserSummary))
 
