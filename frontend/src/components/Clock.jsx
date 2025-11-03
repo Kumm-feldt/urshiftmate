@@ -1,7 +1,7 @@
 import React from "react"
 import "./Clock.css"
 import Pin from "./Pin"
-import MyCalendar from "./Calendar"
+import DemoSchedule from "./DemoSchedule"
 const Clock = () =>{
     return(
         <>

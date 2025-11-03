@@ -13,6 +13,7 @@ import Clock from "./components/Clock";
 
 import { ThreeDot } from "react-loading-indicators";
 import Instructions from "./components/Instructions";
+import DemoSchedule from "./components/DemoSchedule";
 
 
 
@@ -69,6 +70,8 @@ const App = () => {
         <Route path="/profile" element={auth.isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/jobs" element={auth.isAuthenticated ? <JobsCalendar /> : <Navigate to="/login" />} />
         <Route path="/instructions" element={auth.isAuthenticated ? <Instructions /> : <Navigate to="/login" />} />
+        <Route path="/demo" element={auth.isAuthenticated ? <DemoSchedule /> : <Navigate to="/login" />} />
+
         <Route path="*" element={<Navigate to={auth.isAuthenticated ? "/dashboard" : "/login"} />} />
 
         

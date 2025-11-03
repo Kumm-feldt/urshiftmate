@@ -10,16 +10,18 @@ import { Link } from "react-router-dom"; // Make sure to import Link
 import racoon from "../assets/ico2.png" 
 
 
-const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar", "Instructions"];
+const sidebarElements = ["Dashboard", "Settings", "Jobs & Calendar", "Instructions", "Demo Schedule"];
 
 const icons = [
 <i className="bi bi-speedometer2"></i>,
 <i className="bi bi-gear"></i>,
 <i className="bi bi-calendar-week"></i> ,
-<i class="bi bi-info-circle"></i>
+<i class="bi bi-info-circle"></i>,
+<i class="bi bi-briefcase"></i>
+
 ];
 
-const routes = ["/dashboard", "/settings", "/jobs",  "/instructions","/profile"];
+const routes = ["/dashboard", "/settings", "/jobs",  "/instructions","/demo","/profile"];
 
 const bottomRoutes = [ "/profile"];
 const bottomIcons = [<i className="bi bi-person-circle"></i>, <i className="bi bi-box-arrow-right"></i>]

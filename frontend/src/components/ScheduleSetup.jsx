@@ -3,18 +3,18 @@ import { Calendar, Views } from "react-big-calendar";
 import { localizer } from "../calendarSetup";
 
 export default function MyCalendar() {
-  const [events, setEvents] = useState([
-    {
-      title: "John's Shift",
-      start: new Date(2025, 8, 12, 9, 0),  // Sept 12, 2025, 9:00 AM
-      end: new Date(2025, 8, 12, 17, 0),   // Sept 12, 2025, 5:00 PM
-    },
-    {
-      title: "Maria Clocked In",
-      start: new Date(2025, 8, 12, 10, 30),
-      end: new Date(2025, 8, 12, 14, 15),
-    },
-  ]);
+const [events, setEvents] = useState([
+  {
+    title: "John's Shift",
+    start: new Date(2025, 10, 1, 9, 0),   // November 1, 2025
+    end: new Date(2025, 10, 1, 17, 0),    // same day, 5:00 PM
+  },
+  {
+    title: "Maria Josue",
+    start: new Date(2025, 10, 1, 8, 0), // November 31 doesn't exist — change to 30
+    end: new Date(2025, 10, 1, 9, 0),
+  },
+]);
 
   return (
     <div style={{ height: "90vh", padding: "1rem" }}>
