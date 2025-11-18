@@ -1,6 +1,6 @@
 @googleRouter = https://urshiftmate.onrender.com/google/api
 @devRouter = http://localhost:8000/google/api
-@token = 
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnb29nbGVJZCI6IjEwMzI4Nzk3MTU4MDA0NjQwODcwNyIsIm5hbWUiOiJBbnRob255IEt1bW1lcmZlbGR0IiwiZW1haWwiOiJha3VtbWVyZmVsZHRAaGFyZGluZy5lZHUiLCJpYXQiOjE3NjIyMTAxMzksImV4cCI6MTc2MzQxOTczOX0.kNM0aA42ARbkut77ZWEltLsyfF7cQJfGSRjzdnQ3T6E
 
 ###
 # POST request to set workplace configuration

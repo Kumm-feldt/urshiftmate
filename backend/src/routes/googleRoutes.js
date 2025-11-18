@@ -9,26 +9,6 @@ const router = express.Router();
 // +++++++ JWT verification +++++++
 router.use("/api", verifyJWT)
 
-// Proposed RESTful Routes
-// GET /users/:userId -> user/info
-
-
-// GET /users/:userId/summary
-
-
-// GET /users/:userId/events
-
-
-// GET /users/:userId/events/:week
-
-
-// GET /users/:userId/calendars
-
-
-
-
-
-
 // I avoided using .use() because it needs to access ?index query param 
 router.get("/api/user/info", asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.getIndependentUserSummary))
 

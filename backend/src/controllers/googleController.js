@@ -13,75 +13,140 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URL
 );
-const userTimezone = "America/Chicago";
+const DEFAULT_TIMEZONE = "America/Chicago";
 
-// ############################ Helper Functions ##############################
+// ############################ Service Layer ##############################
 
-// Updated helper functions using user's actual timezone
-function startOfDayLocal(d, timezone = "America/Chicago") {
-  return moment.tz(d, timezone).startOf("day");
-}
+class CalendarService {
 
-function endOfDayLocal(d, timezone = "America/Chicago") {
-  return moment.tz(d, timezone).endOf("day");
-}
-
-function convertDateOnlyToTimezone(dateOnlyString, timezone = "America/Chicago") {
-  // Parse as midnight in the specified timezone and return ISO string
-  return moment.tz(dateOnlyString + "T00:00:00", timezone).toISOString();
-}
-
-function getDates(ind = 0, timezone = "America/Chicago") {
-  const index = Number(ind);
-  const now = new Date();
-  const today = startOfDayLocal(now, timezone);
-
-  for (let i = 0; i < dateFile.length; i++) {
-    const from = startOfDayLocal(new Date(dateFile[i].weekOneStart), timezone);
-    const to = endOfDayLocal(new Date(dateFile[i].weekTwoEnd), timezone);
-
-    if (today >= from && today <= to) {
-      const next = dateFile[i + index];
-      if (!next) return null;
-
-      return {
-        weekOneStart: next.weekOneStart,
-        weekOneEnd: next.weekOneEnd,
-        weekTwoStart: next.weekTwoStart,
-        weekTwoEnd: next.weekTwoEnd,
-        checkDay: convertDateOnlyToTimezone(next.checkDate, timezone),
-      };
-    }
+  static async getActiveCalendars(googleId) {
+    const user = await User.findOne({ googleId }).select("calendars -_id");
+    return user?.calendars || [];
   }
-  return null;
-}
 
-async function isActiveCalendar(googleId, calName, isPrimary) {
-  try {
-    const userInfo = await User.findOne({ googleId });
-    if (!userInfo || !userInfo.calendars) {
-      return false;
+  static async getEvents(googleId, startDate, endDate, timezone = DEFAULT_TIMEZONE) {
+    const refreshToken = await getRefreshToken(googleId);
+    if (!refreshToken) {
+      throw new Error("No refresh token found. Please re-authenticate.");
     }
 
-    const trimmedCalName = calName?.trim(); // Trim the input
+    const activeCalendars = await this.getActiveCalendars(googleId);
+    if (activeCalendars.length === 0) {
+      return [];
+    }
+
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
+    const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+    const allEvents = [];
+    const startISO = DateHelper.startOfDay(startDate, timezone).toISOString();
+    const endISO = DateHelper.endOfDay(endDate, timezone).toISOString();
+
+    for (const cal of activeCalendars) {
+      const response = await calendar.events.list({
+        calendarId: cal.calendarId,
+        timeMin: startISO,
+        timeMax: endISO,
+        singleEvents: true,
+        orderBy: "startTime",
+      });
+      allEvents.push(...response.data.items);
+    }
+
+    return allEvents;
+  }
 
 
-    // Also trim the stored calendar names for comparison
-    const hasMatch = userInfo.calendars.some(calendarObj => {
-      const storedName = calendarObj.calendarName?.trim();
-      return (
-        storedName === trimmedCalName ||
-        (isPrimary === true && calendarObj.primary === true)
-      );
-    });
+  static async getWeekEvents(googleId, dates, week, timezone = DEFAULT_TIMEZONE) {
+    const isFirstWeek = week === "first";
+    const startDate = isFirstWeek ? dates.weekOneStart : dates.weekTwoStart;
+    const endDate = isFirstWeek ? dates.weekOneEnd : dates.weekTwoEnd;
 
-    return hasMatch;
+    return this.getEvents(googleId, startDate, endDate, timezone);
+  }
 
-  } catch (err) {
-    console.log("Error in isActiveCalendar:", err);
-    return false;
+
+}
+
+class DateHelper {
+  static getDates(ind = 0, timezone = "America/Chicago") {
+    const index = Number(ind);
+    const now = new Date();
+    const today = startOfDayLocal(now, timezone);
+
+    for (let i = 0; i < dateFile.length; i++) {
+      const from = startOfDayLocal(new Date(dateFile[i].weekOneStart), timezone);
+      const to = endOfDayLocal(new Date(dateFile[i].weekTwoEnd), timezone);
+
+      if (today >= from && today <= to) {
+        const next = dateFile[i + index];
+        if (!next) return null;
+
+        return {
+          weekOneStart: next.weekOneStart,
+          weekOneEnd: next.weekOneEnd,
+          weekTwoStart: next.weekTwoStart,
+          weekTwoEnd: next.weekTwoEnd,
+          checkDay: convertDateOnlyToTimezone(next.checkDate, timezone),
+        };
+      }
+    }
+    return null;
+  }
+  static startOfDayLocal(d, timezone = "America/Chicago") {
+    return moment.tz(d, timezone).startOf("day");
+  }
+
+  static endOfDayLocal(d, timezone = "America/Chicago") {
+    return moment.tz(d, timezone).endOf("day");
+  }
+
+  static convertDateOnlyToTimezone(dateOnlyString, timezone = "America/Chicago") {
+    // Parse as midnight in the specified timezone and return ISO string
+    return moment.tz(dateOnlyString + "T00:00:00", timezone).toISOString();
+  }
+
+  static formatDateRange(startDateTime, endDateTime, timezone = DEFAULT_TIMEZONE) {
+    const startDate = moment.tz(startDateTime, timezone);
+    const endDate = moment.tz(endDateTime, timezone);
+
+    const startStr = startDate.format("M/D/YYYY");
+    const endStr = endDate.format("M/D/YYYY");
+
+    return startStr === endStr ? startStr : `${startStr} - ${endStr}`;
+  }
+
+}
+
+class WorkplaceService {
+  static async getUserWorkplaces(googleId) {
+    const user = await User.findOne({ googleId });
+    if (!user) return [];
+
+    return Workplace.find({ userId: user._id });
   }
 }
+
+// ############################ Business Logic ##############################
+
+class EventProcessor {
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 // #### DELETE CALENDAR #####
@@ -534,27 +599,13 @@ function httpError(statusCode, message) {
   return e;
 }
 
-async function existCalendarsInDb(req, res, next) {
+
+// Check if calendars exist without fetching anything else
+async function checkCalendarsExist(req, res) {
   const googleId = req.userInfo.googleId;
-  try {
-    let user = await User.findOne({ googleId }).select("calendars -_id");
-    let activeCalendars = user?.calendars || [];
+  const activeCalendars = await CalendarService.getActiveCalendars(googleId);
 
-    if (!user) {
-      throw httpError(404, "No user found.");
-    }
-
-    if (activeCalendars.length == 0) {
-      return res.json({ calendarExists: false });
-    } else {
-      return res.json({ calendarExists: true });
-    }
-
-  } catch (err) {
-    throw httpError(500, "Internal Error");
-  }
-  return next()
-
+  res.json({ calendarExists: activeCalendars.length > 0 });
 }
 
 // ############################ API / End Point Data Collector #############################
@@ -680,5 +731,5 @@ async function getActiveCalendars(req, res) {
 
 module.exports = {
   getSummaryEvents, getDetailEvents, dataCollector, getSummaryUser, getGoogleCalendars, getCalendars, getActiveCalendars,
-  addCalendar, deleteCalendar, existCalendarsInDb, independentUserSummary, getIndependentUserSummary, deleteWorkplace, getPaymentPerWeek
+  addCalendar, deleteCalendar, checkCalendarExist, independentUserSummary, getIndependentUserSummary, deleteWorkplace, getPaymentPerWeek
 }
