@@ -2,67 +2,99 @@
 
 const { User } = require("../models/User");
 const { Workplace } = require("../models/Workplace");
+const {HttpError} = require("../utils/utils")
 
-async function addWorkplace (req, res) {
+class WorkplaceService {
 
-    const { workplace, hourlyRate } = req.body;
-    // optionally get it from frontend
-    let userId;
-    if(req.body.userId){
-     userId = req.body.userId;
-    }
+ static async getUserWorkplaces(googleId) {
+  const user = await User.findOne({ googleId });
+  if (!user) {
+    throw new HttpError(404, "User not found");
+  }
   
-    try{
-      // if not received, then use session to find it 
-      if(!userId){
-        googleId = String(req.userInfo.googleId);
-        const user = await User.findOne({ googleId });
+  const workplaces = await Workplace.find({ userId: user._id });
+  
+  return workplaces.map(job => ({
+    workplace: job.workplace,
+    hourlyRate: job.hourlyRate,
+    workplaceId: job._id
+  }));
+}
 
-        if(!user){
-          return res.status(401).json({error: "User not found"})
-        }
-        userId = user._id
-        
-      }
-      const newWorkplace = new Workplace({
-      userId,
-      workplace,
-      hourlyRate,
+  static async deleteWorkplace(googleId, workplaceId) {
+    const user = await User.findOne({ googleId });
+    if (!user) {
+      throw new HttpError(404, "User not found");
+    }
+
+    const result = await Workplace.deleteOne({
+      _id: workplaceId,
+      userId: user._id
     });
-    await newWorkplace.save();
-    res.json(newWorkplace);
-  }catch(err){
-    console.error("Error adding workplace:", err);
-    res.status(500).json({ error: "Failed to add workplace" });
+
+    if (result.deletedCount === 0) {
+      throw new HttpError(404, "Workplace not found");
+    }
+
+    return { deleted: true };
   }
 
+static async addWorkplace(googleId, workplace, hourlyRate) {
+  const user = await User.findOne({ googleId });
+  if (!user) {
+    throw new HttpError(404, "User not found");
+  }
+  
+  const newWorkplace = new Workplace({
+    userId: user._id,
+    workplace,
+    hourlyRate,
+  });
+  
+  await newWorkplace.save();
+  return newWorkplace;
+}
+
+}
+
+class WorkplaceController {
+  static async remove(req, res) {
+    const { googleId } = req.userInfo;
+    const { workplaceId } = req.params;
+
+    if (!workplaceId) {
+      throw new HttpError(400, "workplaceId is required");
+    }
+
+    const result = await WorkplaceService.deleteWorkplace(googleId, workplaceId);
+    res.json(result);
+  }
+
+
+  static async add(req, res) {
+    const { workplace, hourlyRate } = req.body;
+    const { googleId } = req.userInfo;
+
+    try {
+      const newWorkplace = await WorkplaceService.addWorkplace(googleId, workplace, hourlyRate);
+      res.json(newWorkplace);
+    } catch (err) {
+      throw new HttpError(500, "Error adding workplace");
+    }
+
   };
 
-  async function getWorkplace (req, res) {
-    let data = []
-    const googleId = req.userInfo.googleId;
+  static async get(req, res) {
+    const { googleId } = req.userInfo;
 
-    try{
-    let user = await User.findOne({googleId})
-    let userId = user._id
-    const workplaces = await Workplace.find({userId});
-
-    if(workplaces.length > 0){
-      workplaces.forEach((job)=>{
-        data.push(
-          {
-          workplace:  job.workplace,
-          hourlyRate: job.hourlyRate,
-          workplaceId: job._id
-        }
-      )
-      })
+    try {
+      const data = await WorkplaceService.getUserWorkplaces(googleId);
+      res.json(data)
+    } catch (err) {
+      throw new HttpError(500, "Error fetching workplace");
     }
-    }catch(err){
-      console.log("Error fetching all worplaces")
-    }
-    res.json(data)
 
-  };
+  }
+}
 
-  module.exports = {addWorkplace, getWorkplace}
+module.exports = { WorkplaceController }

@@ -1,26 +1,79 @@
 const express = require("express");
-const googleController = require("../controllers/googleController");
-const { isAuthenticated } = require("../middlewares/authMiddleware");
-const { asyncHandler } = require("../middlewares/asyncHandler");
+const { 
+  PaycheckController, 
+  CalendarController 
+} = require("../controllers/googleController");
+const { 
+  WorkplaceController, 
+} = require("../controllers/workplaceController");
 const { verifyJWT } = require("../middlewares/jwtMiddleware");
+const { asyncHandler } = require("../middlewares/asyncHandler");
 
 const router = express.Router();
 
-// +++++++ JWT verification +++++++
-router.use("/api", verifyJWT)
+// ############################ Global JWT Protection ############################
+router.use(verifyJWT);
 
-// I avoided using .use() because it needs to access ?index query param 
-router.get("/api/user/info", asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.getIndependentUserSummary))
+// ############################ Paycheck Resources ############################
+// GET /api/paychecks/summary?index=0
+// Returns: Complete paycheck information with both weeks' data
+router.get(
+  "/paychecks/summary", 
+  asyncHandler(PaycheckController.getPaycheckSummary)
+);
 
-router.get("/api/existCalendars", asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.existCalendarsInDb));
+// GET /api/paychecks/details?index=0
+// Returns: Detailed shift events for both weeks
+router.get(
+  "/paychecks/details", 
+  asyncHandler(PaycheckController.getPaycheckDetails)
+);
 
-router.get("/api/detailedEvents",asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.dataCollector), asyncHandler(googleController.getDetailEvents));
+// GET /api/paychecks/overview?index=0
+// Returns: Basic user info and date ranges (no event data)
+router.get(
+  "/paychecks/overview", 
+  asyncHandler(PaycheckController.getPaycheckOverview)
+);
 
-router.get("/api/paymentPerWeek",  asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.dataCollector), asyncHandler(googleController.getPaymentPerWeek));
+// ############################ Calendar Resources ############################
+// GET /api/calendars
+// Returns: All available Google calendars with active status
+router.get(
+  "/calendars", 
+  asyncHandler(CalendarController.list)
+);
 
-router.get("/api/summaryEvents",  asyncHandler(googleController.independentUserSummary),asyncHandler(googleController.dataCollector),  asyncHandler(googleController.getSummaryEvents));
+// GET /api/calendars/active
+// Returns: Currently active calendars only
+router.get(
+  "/calendars/active", 
+  asyncHandler(CalendarController.listActive)
+);
 
-router.get("/api/summaryUser",  asyncHandler(googleController.independentUserSummary), asyncHandler(googleController.dataCollector), asyncHandler(googleController.getSummaryUser));
+// POST /api/calendars
+// Body: { calendarId, summary }
+// Returns: { added: true }
+router.post(
+  "/calendars", 
+  asyncHandler(CalendarController.add)
+);
+
+// DELETE /api/calendars
+// Body: { calendarId, primary }
+// Returns: { removed: true } or { removed: false, message }
+router.delete(
+  "/calendars", 
+  asyncHandler(CalendarController.remove)
+);
+
+// GET /api/calendars/exists
+// Returns: { exists: boolean }
+router.get(
+  "/calendars/exists", 
+  asyncHandler(CalendarController.checkExists)
+);
+
 
 
 module.exports = router;

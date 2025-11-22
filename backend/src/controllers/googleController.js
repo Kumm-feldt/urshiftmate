@@ -3,8 +3,8 @@ const { getRefreshToken } = require("./userController");
 const { builtinModules } = require("module");
 const { Workplace } = require("../models/Workplace");
 const { User } = require("../models/User");
-const dateFile = require("./dates.json");
 const moment = require("moment-timezone");
+const {HttpError, DateHelper} = require("../utils/utils")
 
 require('dotenv').config();
 
@@ -15,22 +15,63 @@ const oauth2Client = new google.auth.OAuth2(
 );
 const DEFAULT_TIMEZONE = "America/Chicago";
 
-// ############################ Service Layer ##############################
 
+// ############################ Service Layer ##############################
 class CalendarService {
 
+  // Returns active calendars from DB
   static async getActiveCalendars(googleId) {
     const user = await User.findOne({ googleId }).select("calendars -_id");
     return user?.calendars || [];
   }
 
+  // Returns boolean value if calendar is active
+  static async isCalendarActive(googleId, summary, isPrimary) {
+    const user = await this.getActiveCalendars(googleId);
+
+    return user.calendars.some(cal =>
+      cal.calendarName === summary || (isPrimary && cal.calendarName === "Primary")
+    );
+  }
+
+  // Returns a list of objects of the users calendars and its information
+  static async getGoogleCalendarList(googleId) {
+    const refreshToken = await getRefreshToken(googleId);
+    if (!refreshToken) {
+      throw new HttpError(401, "No refresh token found. Please re-authenticate.");
+    }
+
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
+    const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+    const response = await calendar.calendarList.list();
+    if (!response.data.items || response.data.items.length === 0) {
+      return [];
+    }
+
+    const calendarList = [];
+    for (const cal of response.data.items) {
+      const isActive = await this.isCalendarActive(googleId, cal.summary, cal.primary);
+      calendarList.push({
+        calendarId: cal.id,
+        calendarSummary: cal.summary,
+        primary: cal.primary || false,
+        activeCalendar: isActive
+      });
+    }
+
+    return calendarList;
+  }
+
+  // Returns a list of all the events from the active calendars from a certain date range
   static async getEvents(googleId, startDate, endDate, timezone = DEFAULT_TIMEZONE) {
     const refreshToken = await getRefreshToken(googleId);
     if (!refreshToken) {
-      throw new Error("No refresh token found. Please re-authenticate.");
+      throw new HttpError(401, "No refresh token found. Please re-authenticate.");
     }
 
     const activeCalendars = await this.getActiveCalendars(googleId);
+
     if (activeCalendars.length === 0) {
       return [];
     }
@@ -39,8 +80,9 @@ class CalendarService {
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
     const allEvents = [];
-    const startISO = DateHelper.startOfDay(startDate, timezone).toISOString();
-    const endISO = DateHelper.endOfDay(endDate, timezone).toISOString();
+  const startISO = DateHelper.startOfDayLocal(startDate, timezone).toISOString();
+  const endISO = DateHelper.endOfDayLocal(endDate, timezone).toISOString();
+
 
     for (const cal of activeCalendars) {
       const response = await calendar.events.list({
@@ -56,7 +98,8 @@ class CalendarService {
     return allEvents;
   }
 
-
+  // Validates if it is first week vs. second week and according to it it will call getEvents 
+  // to get the events of one week (either first or second week)
   static async getWeekEvents(googleId, dates, week, timezone = DEFAULT_TIMEZONE) {
     const isFirstWeek = week === "first";
     const startDate = isFirstWeek ? dates.weekOneStart : dates.weekTwoStart;
@@ -65,671 +108,327 @@ class CalendarService {
     return this.getEvents(googleId, startDate, endDate, timezone);
   }
 
-
-}
-
-class DateHelper {
-  static getDates(ind = 0, timezone = "America/Chicago") {
-    const index = Number(ind);
-    const now = new Date();
-    const today = startOfDayLocal(now, timezone);
-
-    for (let i = 0; i < dateFile.length; i++) {
-      const from = startOfDayLocal(new Date(dateFile[i].weekOneStart), timezone);
-      const to = endOfDayLocal(new Date(dateFile[i].weekTwoEnd), timezone);
-
-      if (today >= from && today <= to) {
-        const next = dateFile[i + index];
-        if (!next) return null;
-
-        return {
-          weekOneStart: next.weekOneStart,
-          weekOneEnd: next.weekOneEnd,
-          weekTwoStart: next.weekTwoStart,
-          weekTwoEnd: next.weekTwoEnd,
-          checkDay: convertDateOnlyToTimezone(next.checkDate, timezone),
-        };
-      }
-    }
-    return null;
-  }
-  static startOfDayLocal(d, timezone = "America/Chicago") {
-    return moment.tz(d, timezone).startOf("day");
-  }
-
-  static endOfDayLocal(d, timezone = "America/Chicago") {
-    return moment.tz(d, timezone).endOf("day");
-  }
-
-  static convertDateOnlyToTimezone(dateOnlyString, timezone = "America/Chicago") {
-    // Parse as midnight in the specified timezone and return ISO string
-    return moment.tz(dateOnlyString + "T00:00:00", timezone).toISOString();
-  }
-
-  static formatDateRange(startDateTime, endDateTime, timezone = DEFAULT_TIMEZONE) {
-    const startDate = moment.tz(startDateTime, timezone);
-    const endDate = moment.tz(endDateTime, timezone);
-
-    const startStr = startDate.format("M/D/YYYY");
-    const endStr = endDate.format("M/D/YYYY");
-
-    return startStr === endStr ? startStr : `${startStr} - ${endStr}`;
-  }
-
-}
-
-class WorkplaceService {
-  static async getUserWorkplaces(googleId) {
-    const user = await User.findOne({ googleId });
-    if (!user) return [];
-
-    return Workplace.find({ userId: user._id });
-  }
-}
-
-// ############################ Business Logic ##############################
-
-class EventProcessor {
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-// #### DELETE CALENDAR #####
-async function deleteCalendar(req, res) {
-  let googleId = req.userInfo?.googleId;
-  let calendarToDelete = req.body?.calendarId;
-  let primary = req.body?.primary;
-
-
-  if (!googleId) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  if (typeof calendarToDelete !== "string" || !calendarToDelete.trim()) {
-    return res.status(400).json({ error: "summary is required" });
-  }
-
-  try {
-    const check = await User.findOne({ googleId });
-    // Function to check primary Calendars that their summary is not "Primary"
-    // ** remember that the db has a default of "Primary" in the calendar field
-    if (check && primary && calendarToDelete != "Primary") {
-      const hasMatch = check.calendars.some(calendar =>
-        calendar.trim() === "Primary")
-      if (hasMatch) {
-        calendarToDelete = "Primary"
-      }
-
-    }
-    // pull the calendar from the array; returns the *old* doc by default
-    const result = await User.updateOne(
-      { googleId },
-      { $pull: { calendars: { calendarId: calendarToDelete.trim() } } }
-    );
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // If nothing was modified, the calendar wasn't present
-    if (result.modifiedCount === 0) {
-      return res.status(200).json({ removed: false, message: "Calendar not found in list" });
-    }
-
-    return res.status(200).json({ removed: true });
-
-
-  } catch (err) {
-    console.error("Error deleting calendar:", err);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-// #### DELETE WORKPLACE ####
-async function deleteWorkplace(req, res) {
-  let googleId = req.userInfo?.googleId;
-  let workplaceId = req.params.workplaceId;
-  if (!googleId) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  if (!workplaceId) {
-    return res.status(401).json({ error: "Workplace not provided" });
-  }
-
-  try {
-    const user = await User.findOne({ googleId });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    // pull the calendar from the array; returns the *old* doc by default
-    const result = await Workplace.deleteOne(
-      {
-
-        _id: workplaceId, // <--- use _id
-        userId: user._id
-
-      }
-    );
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ error: "User or workplace not found" });
-    }
-
-    return res.status(200).json({ deleted: true });
-
-
-  } catch (err) {
-    console.error("Error deleting workplace:", err);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-
-// #### ADD CALENDAR ####
-async function addCalendar(req, res) {
-  let googleId = req.userInfo?.googleId;
-
-  let calendarId = req.body?.calendarId;
-  let calendarName = req.body?.summary;
-
-  if (!googleId) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-
-  try {
-    // pull the calendar from the array; returns the *old* doc by default
+  // #### ADD CALENDAR ####
+  static async addCalendar(googleId, calendarId, calendarName) {
     const result = await User.updateOne(
       { googleId },
       { $push: { calendars: { calendarId, calendarName: calendarName.trim() } } }
     );
+
     if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "User not found" });
+      throw new HttpError(404, "User not found");
     }
 
-    return res.status(200).json({ added: true });
+    return { added: true };
+  }
 
+  // #### DELETE CALENDAR ####
+  static async deleteCalendar(googleId, calendarId, isPrimary) {
+    let calendarToDelete = calendarId;
 
-  } catch (err) {
-    console.error("Error adding calendar:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    // Handle primary calendar logic
+    if (isPrimary && calendarId !== "Primary") {
+      const user = await User.findOne({ googleId });
+      if (user) {
+        const hasMatch = user.calendars.some(cal => cal.calendarName === "Primary");
+        if (hasMatch) {
+          calendarToDelete = "Primary";
+        }
+      }
+    }
+
+    const result = await User.updateOne(
+      { googleId },
+      { $pull: { calendars: { calendarId: calendarToDelete.trim() } } }
+    );
+
+    if (result.matchedCount === 0) {
+      throw new HttpError(404, "User not found");
+    }
+
+    if (result.modifiedCount === 0) {
+      return { removed: false, message: "Calendar not found in list" };
+    }
+
+    return { removed: true };
   }
 }
 
+class UserService {
+  static async getUserInfo(googleId) {
+    const user = await User.findOne({ googleId });
+    return user ? { name: user.name, googleId: user.googleId } : null;
+  }
+    static async getUserTimezone(googleId) {
+    //const user = await User.findOne({ googleId }).select("timezone -_id");
+    return DEFAULT_TIMEZONE;
+  }
+}
 
-// ############################ Process Data Functions ##############################
-async function getGoogleCalendars(req, res, next) {
-  const googleId = req.userInfo.googleId
-  let calendarList = []
-  try {
-    const refreshToken = await getRefreshToken(googleId);
-    if (!refreshToken) {
-      throw new Error("No refresh token found. Please re-authenticate.");
+// ############################ Business Logic ##############################
+class EventProcessor {
+  // From a list of events [from the active calendars] it filters the ones with the keyword shift. 
+  // Then returns a list of events with its information from each shift.
+  // ->>>>>>>>>>>> Wouldnt it be better to filter it before?
+  static async processShiftEvents(googleId, events, timezone = DEFAULT_TIMEZONE) {
+    const user = await User.findOne({ googleId });
+    if (!user) {
+      return [];
     }
 
-    oauth2Client.setCredentials({ refresh_token: refreshToken })
-    const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+    const jobs = await Workplace.find({ userId: user._id });
+    if (jobs.length === 0) {
+      return [];
+    }
 
-    const response = await calendar.calendarList.list(); // get the list of available calendars
-    if (response.data.items && response.data.items.length > 0) {
-      // for ... of to handle async functions
-      for (const cal of response.data.items) {
-        const activeStatus = await isActiveCalendar(googleId, cal.summary, cal.primary);
-        calendarList.push({
-          calendarId: cal.id,
-          calendarSummary: cal.summary,
-          primary: cal.primary || false,
-          activeCalendar: activeStatus
-        });
+    const processedEvents = [];
+
+    for (const event of events) {
+      if (!event.summary || !event.summary.toLowerCase().includes("shift")) {
+        continue;
       }
 
-      res.locals.googleCalendarList = calendarList;
-      return next();
-    }
-  } catch (error) {
+      for (const job of jobs) {
+        if (event.summary.toLowerCase().includes(job.workplace.toLowerCase())) {
+          const startMoment = moment.tz(event.start.dateTime, timezone);
+          const endMoment = moment.tz(event.end.dateTime, timezone);
+          const totalHours = endMoment.diff(startMoment, 'hours', true);
+          const totalWage = totalHours * job.hourlyRate;
 
-    console.error("Error in getDetailEventsMiddleware:", error);
-    if (!res.headersSent) {
-      return next(error);
-    }
-  }
-
-
-
-}
-
-// Updated getEvents function with timezone
-async function getEvents(googleId, dates, week, timezone = "America/Chicago") {
-  let startDate = new Date();
-  let endDate = new Date();
-  let allEvents = [];
-
-  if (week == "first") {
-    startDate = startOfDayLocal(dates.weekOneStart, timezone).toISOString();
-    endDate = endOfDayLocal(dates.weekOneEnd, timezone).toISOString();
-  } else {
-    startDate = startOfDayLocal(dates.weekTwoStart, timezone).toISOString();
-    endDate = endOfDayLocal(dates.weekTwoEnd, timezone).toISOString();
-  }
-
-  try {
-    const refreshToken = await getRefreshToken(googleId);
-    let user = await User.findOne({ googleId }).select("calendars -_id");
-    let activeCalendars = user?.calendars || [];
-
-    if (activeCalendars.length === 0) {
-      return allEvents;
-    }
-
-    if (!refreshToken) {
-      throw new Error("No refresh token found. Please re-authenticate.");
-    }
-
-    oauth2Client.setCredentials({ refresh_token: refreshToken });
-    const calendar = google.calendar({ version: "v3", auth: oauth2Client });
-
-    for (const cal of activeCalendars) {
-      const response = await calendar.events.list({
-        calendarId: cal.calendarId,
-        timeMin: startDate,
-        timeMax: endDate,
-        singleEvents: true,
-        orderBy: "startTime",
-      });
-      allEvents.push(...response.data.items);
-    }
-
-    return allEvents;
-
-  } catch (error) {
-    console.error("Error fetching events:", error);
-    throw new Error(`Error fetching events: ${error}`);
-  }
-}
-
-
-function filterDateEvents(startDateTime, endDateTime, timezone = "America/Chicago") {
-  const startDate = moment.tz(startDateTime, timezone);
-  const endDate = moment.tz(endDateTime, timezone);
-
-  const startStr = startDate.format("M/D/YYYY");
-  const endStr = endDate.format("M/D/YYYY");
-
-  if (startStr === endStr) {
-    return startStr;
-  }
-
-  return `${startStr} - ${endStr}`;
-}
-
-async function getPaycheckInfo(googleId, eventList) {
-  let filteredData = {
-    totalWage: 0,
-    totalHours: 0,
-    taxedPaycheck: 0
-
-  };
-  try {
-    let user = await User.findOne({ googleId });
-    if (!user) {
-      console.log('No user found for googleId:', googleId);
-      return filteredData;
-    }
-
-    let jobs = await Workplace.find({ userId: user._id });
-
-    if (jobs.length > 0) {
-
-      eventList.forEach((event) => {
-        if (event.summary && event.summary.toLowerCase().includes("shift")) {
-
-          jobs.forEach((job) => {
-
-            if (event.summary.toLowerCase().includes(job.workplace.toLowerCase())) {
-              const startMoment = moment.tz(event.start.dateTime, userTimezone);
-              const endMoment = moment.tz(event.end.dateTime, userTimezone);
-              let totalHours = endMoment.diff(startMoment, 'hours', true);
-              let totalWage = totalHours * job.hourlyRate;
-
-              filteredData.totalWage += Math.round(totalWage * 100) / 100;
-              filteredData.totalHours += Math.round(totalHours * 100) / 100;
-              filteredData.taxedPaycheck += Math.round(totalWage * 100) / 100;
-            }
-          })
-
+          processedEvents.push({
+            workplace: job.workplace,
+            wage: job.hourlyRate,
+            date: DateHelper.formatDateRange(event.start.dateTime, event.end.dateTime, timezone),
+            startTime: startMoment.format('hh:mm A'),
+            endTime: endMoment.format('hh:mm A'),
+            totalWage: Math.round(totalWage * 100) / 100,
+            totalHours: Math.round(totalHours * 100) / 100
+          });
         }
-      })
-    }
-
-
-  } catch (err) {
-    throw new Error(`Error Filtering Events ${err}`);
-
-  }
-
-  return filteredData;
-
-
-}
-
-
-async function filterEvents(googleId, eventList) {
-
-  let filteredData = [];
-  try {
-    let user = await User.findOne({ googleId });
-    if (!user) {
-      console.log('No user found for googleId:', googleId);
-      return filteredData;
-    }
-
-    let jobs = await Workplace.find({ userId: user._id });
-
-    if (jobs.length > 0) {
-
-      eventList.forEach((event) => {
-        if (event.summary && event.summary.toLowerCase().includes("shift")) {
-
-          jobs.forEach((job) => {
-
-            if (event.summary.toLowerCase().includes(job.workplace.toLowerCase())) {
-              const startMoment = moment.tz(event.start.dateTime, userTimezone);
-              const endMoment = moment.tz(event.end.dateTime, userTimezone);
-              let totalHours = endMoment.diff(startMoment, 'hours', true);
-              let totalWage = totalHours * job.hourlyRate;
-
-              filteredData.push({
-                workplace: job.workplace,
-                wage: job.hourlyRate,
-                date: filterDateEvents(event.start.dateTime, event.end.dateTime, userTimezone),
-                startTime: startMoment.format('hh:mm A'),
-                endTime: endMoment.format('hh:mm A'),
-
-                totalWage: Math.round(totalWage * 100) / 100,
-                totalHours: Math.round(totalHours * 100) / 100
-              }
-
-              )
-            }
-          })
-
-        }
-      })
-    }
-
-  } catch (err) {
-    throw new Error(`Error Filtering Events ${err}`);
-
-  }
-
-  return filteredData;
-
-
-}
-
-async function summaryEvents(filteredEvents) {
-
-  try {
-    let summaryOfEvents = [];
-    let existingSummary;
-    filteredEvents.forEach((event) => {
-
-      if (summaryOfEvents.length > 0) {
-        existingSummary = summaryOfEvents.find(
-          briefEvent => briefEvent.workplace.toLowerCase() === event.workplace.toLowerCase()
-        );
       }
+    }
 
-      if (existingSummary) {
-        existingSummary.totalWage += event.totalWage;
-        existingSummary.totalHours += event.totalHours;
-      } else {
-        summaryOfEvents.push({
+    return processedEvents;
+  }
+
+  // Paycheck summary biweekly
+  static calculatePaycheckSummary(events) {
+    return events.reduce((acc, event) => ({
+      totalWage: acc.totalWage + event.totalWage,
+      totalHours: acc.totalHours + event.totalHours,
+      taxedPaycheck: acc.taxedPaycheck + event.totalWage
+    }), { totalWage: 0, totalHours: 0, taxedPaycheck: 0 });
+  }
+
+  // returns a list of summaries with information per shift biweekly
+   static summarizeByWorkplace(events) {
+    const summary = {};
+
+    for (const event of events) {
+      const key = event.workplace.toLowerCase();
+      if (!summary[key]) {
+        summary[key] = {
           workplace: event.workplace,
           wage: event.wage,
-          totalWage: event.totalWage,
-          totalHours: event.totalHours
-        })
+          totalWage: 0,
+          totalHours: 0
+        };
       }
 
+      summary[key].totalWage += event.totalWage;
+      summary[key].totalHours += event.totalHours;
+    }
 
-    })
-
-    return summaryOfEvents;
-  } catch (err) {
-    throw new Error(`Error Filtering Events ${err}`);
-
+    return Object.values(summary);
   }
-
-
 }
 
-async function independentUserSummary(req, res, next) {
-  const googleId = req.userInfo.googleId;
-  const dates = getDates(req.query.index);
-  res.locals.dates = dates;
+class PaycheckCalculator {
+ static calculate(summaryEvents, dates, username, taxPercent = 10.05) {
+    let totalPaycheck = 0;
+    let totalHours = 0;
 
-  if (dates == null) throw httpError(404, "No valid dates")
+    for (const weekEvents of summaryEvents) {
+      if (weekEvents) {
+        for (const event of weekEvents) {
+          totalPaycheck += event.totalWage;
+          totalHours += event.totalHours;
+        }
+      }
+    }
 
-  let username = await User.findOne({ googleId });
-  if (!username) {
-    username = '';
-  } else {
-    username = username.name;
-  }
+    const gross = totalPaycheck;
+    const net = gross * (1 - taxPercent / 100);
 
-  res.locals.username = username
-  res.locals.independentUserSummary = {
-    username: username,
-    checkDay: dates.checkDay,
-    startWeekOne: dates.weekOneStart,
-    endWeekOne: dates.weekOneEnd,
-    startWeekTwo: dates.weekTwoStart,
-    endWeekTwo: dates.weekTwoEnd,
-  };
-  next();
-
-}
-
-async function getIndependentUserSummary(req, res, next) {
-
-  return res.json(res.locals.independentUserSummary);
-}
-
-
-
-async function summaryUser(summaryEvents, dates, username, taxPercent = 10.05) {
-  try {
-    let data = {
-      username: username,
-      paycheck: 0,
-      totalHours: 0,
+    return {
+      username,
+      paycheck: gross.toFixed(2),
+      taxedPaycheck: net.toFixed(2),
+      totalHours: Math.round(totalHours * 100) / 100,
       checkDay: dates.checkDay,
       startWeekOne: dates.weekOneStart,
       endWeekOne: dates.weekOneEnd,
       startWeekTwo: dates.weekTwoStart,
       endWeekTwo: dates.weekTwoEnd,
     };
+  }
+}
 
-    if (summaryEvents) {
-      for (let i = 0; i < 2; i++) {
-        let summEvent = summaryEvents[i];
-        summEvent.forEach((event) => {
-          data.paycheck += event.totalWage;
-          data.totalHours += event.totalHours;
-        })
+// ############################ Controller Layer ##############################
+class PaycheckController {
+  static async getPaycheckSummary(req, res) {
+    const { googleId } = req.userInfo;
+    const index = req.query.index || 0;
 
+    const dates = DateHelper.getDates(index);
+    if (!dates) {
+      throw new HttpError(404, "No valid dates found for the given index");
+    }
+
+    const user = await UserService.getUserInfo(googleId);
+    const timezone = await UserService.getUserTimezone(googleId);
+
+    // Fetch events for both weeks in parallel
+    const [firstWeekEvents, secondWeekEvents] = await Promise.all([
+      CalendarService.getWeekEvents(googleId, dates, "first", timezone),
+      CalendarService.getWeekEvents(googleId, dates, "second", timezone)
+    ]);
+
+    // Process events for both weeks in parallel
+    const [firstWeekProcessed, secondWeekProcessed] = await Promise.all([
+      EventProcessor.processShiftEvents(googleId, firstWeekEvents, timezone),
+      EventProcessor.processShiftEvents(googleId, secondWeekEvents, timezone)
+    ]);
+
+    // Create summaries
+    const firstWeekSummary = EventProcessor.summarizeByWorkplace(firstWeekProcessed);
+    const secondWeekSummary = EventProcessor.summarizeByWorkplace(secondWeekProcessed);
+
+    const paycheckSummary = PaycheckCalculator.calculate(
+      [firstWeekSummary, secondWeekSummary],
+      dates,
+      user?.name || ''
+    );
+
+    res.json({
+      summary: paycheckSummary,
+      weekOne: {
+        summary: firstWeekSummary,
+        details: firstWeekProcessed
+      },
+      weekTwo: {
+        summary: secondWeekSummary,
+        details: secondWeekProcessed
       }
-
-    }
-    const gross = data.paycheck;
-    const net = gross * (1 - taxPercent / 100);
-    data.taxedPaycheck = net.toFixed(2);
-    data.paycheck = gross.toFixed(2)
-    return data;
-
-  } catch (err) {
-    throw new Error(`${err}`);
-
+    });
   }
+static async getPaycheckDetails(req, res) {
+    const { googleId } = req.userInfo;
+    const index = req.query.index || 0;
 
-
-}
-
-function calculateTax(data, tax) {
-  return (data * tax).toFixed(2);
-}
-
-
-
-function httpError(statusCode, message) {
-  const e = new Error(message);
-  e.statusCode = statusCode;
-  return e;
-}
-
-
-// Check if calendars exist without fetching anything else
-async function checkCalendarsExist(req, res) {
-  const googleId = req.userInfo.googleId;
-  const activeCalendars = await CalendarService.getActiveCalendars(googleId);
-
-  res.json({ calendarExists: activeCalendars.length > 0 });
-}
-
-// ############################ API / End Point Data Collector #############################
-async function dataCollector(req, res, next) {
-  const googleId = req.userInfo.googleId;
-  const index = req.query.index;
-
-  if (!googleId) throw httpError(401, "Not authenticated with Google.");
-  if (index == null) throw httpError(400, "Missing 'index' query param.");
-
-  // Obtain an object with the start/end dates from each week with the index (index 0 = current date). 
-  // It is retrieved from a JSON file 
-  const dateObject = res.locals.dates;
-
-  // obtain a list of events from the active calendars (in DB) and according to the week prompted
-  const firstWeekEvents = await getEvents(googleId, dateObject, "first"); // <-------------- check
-  const secondWeekEvents = await getEvents(googleId, dateObject, "second");
-
-
-  if (!firstWeekEvents && !secondWeekEvents) {
-    throw httpError(404, "No events returned for the given dates.");
-  }
-
-  let firstWeekFilteredData;
-  let secondWeekFilteredData;
-
-  if (!firstWeekEvents) {
-    secondWeekFilteredData = await filterEvents(googleId, secondWeekEvents);
-    firstWeekFilteredData = null
-  } else if (!secondWeekEvents) {
-    firstWeekFilteredData = await filterEvents(googleId, firstWeekEvents);
-    secondWeekFilteredData = null
-  } else {
-    firstWeekFilteredData = await filterEvents(googleId, firstWeekEvents);
-    secondWeekFilteredData = await filterEvents(googleId, secondWeekEvents);
-  }
-
-  res.locals.filteredData = {
-    "first": firstWeekFilteredData,
-    "second": secondWeekFilteredData
-  };
-
-  // Provides an array as a summary of all events from each week [workplace, wage, totalWage, totalHours]
-  let firstWSummaryData = await summaryEvents(firstWeekFilteredData);
-  let secondWSummaryData = await summaryEvents(secondWeekFilteredData);
-
-  res.locals.summaryData = {
-    "first": firstWSummaryData,
-    "second": secondWSummaryData
-  };
-  const username = res.locals.username;
-  // Provides an array as a general summary of the user's activity. 
-  // [ username, paycheck, totalHours, checkDay, startWeekOne, endWeekOne, startWeekTwo, endWeekTwo]
-  let userSummary = await summaryUser([firstWSummaryData, secondWSummaryData], dateObject, username);
-
-  res.locals.summaryUser = userSummary;
-
-  return next();
-}
-
-
-// ############################ End Point Data Collector #############################
-
-async function getDetailEvents(req, res, next) {
-  const filteredData = res.locals.filteredData;
-  res.json(filteredData);
-}
-
-
-async function getSummaryEvents(req, res) {
-  let summary = res.locals.summaryData;
-  res.json(summary);
-
-}
-
-async function getSummaryUser(req, res) {
-  let summaryUser = res.locals.summaryUser;
-  res.json(summaryUser);
-}
-
-async function getPaymentPerWeek(req, res) {
-
-  const googleId = req.userInfo.googleId;
-  const username = res.locals.username;
-  const dates = getDates(req.query.index);
-
-  // Obtain an object with the start/end dates from each week with the index (index 0 = current date). 
-  // It is retrieved from a JSON file 
-  const dateObject = res.locals.dates;
-
-  // obtain a list of events from the active calendars (in DB) and according to the week prompted
-  const firstWeekEvents = await getEvents(googleId, dateObject, "first");
-  const secondWeekEvents = await getEvents(googleId, dateObject, "second");
-
-  const allEvents = firstWeekEvents.concat(secondWeekEvents);
-
-  const filteredEvents = await getPaycheckInfo(googleId, allEvents);
-
-  res.json(filteredEvents);
-}
-
-async function getCalendars(req, res) {
-  let calendars = res.locals.googleCalendarList;
-  res.json(calendars);
-}
-
-async function getActiveCalendars(req, res) {
-  const googleId = req.userInfo.googleId
-  try {
-    let user = await User.findOne({ googleId })
-    if (user) {
-      res.json(user.calendars)
-    } else {
-      console.log("No user found")
+    const dates = DateHelper.getDates(index);
+    if (!dates) {
+      throw new HttpError(404, "No valid dates found for the given index");
     }
 
-  } catch (err) {
-    console.log(err)
+    const timezone = await UserService.getUserTimezone(googleId);
+
+    // Gets a list of all the events events 
+    const [firstWeekEvents, secondWeekEvents] = await Promise.all([
+      CalendarService.getWeekEvents(googleId, dates, "first", timezone),
+      CalendarService.getWeekEvents(googleId, dates, "second", timezone)
+    ]);
+
+    // Process only the events with the keyword "Shift" and the jobs in the db
+    const [firstWeekProcessed, secondWeekProcessed] = await Promise.all([
+      EventProcessor.processShiftEvents(googleId, firstWeekEvents, timezone),
+      EventProcessor.processShiftEvents(googleId, secondWeekEvents, timezone)
+    ]);
+
+    res.json({
+      weekOne: firstWeekProcessed,
+      weekTwo: secondWeekProcessed
+    });
+  }
+
+   static async getPaycheckOverview(req, res) {
+    const { googleId } = req.userInfo;
+    const index = req.query.index || 0;
+
+    const dates = DateHelper.getDates(index);
+    if (!dates) {
+      throw new HttpError(404, "No valid dates found for the given index");
+    }
+
+    const user = await UserService.getUserInfo(googleId);
+
+    res.json({
+      username: user?.name || '',
+      checkDay: dates.checkDay,
+      weekOne: {
+        start: dates.weekOneStart,
+        end: dates.weekOneEnd
+      },
+      weekTwo: {
+        start: dates.weekTwoStart,
+        end: dates.weekTwoEnd
+      }
+    });
   }
 }
 
+class CalendarController {
+  static async list(req, res) {
+    const { googleId } = req.userInfo;
+    const calendars = await CalendarService.getGoogleCalendarList(googleId);
+    res.json({ calendars });
+  }
 
+  static async listActive(req, res) {
+    const { googleId } = req.userInfo;
+    const calendars = await CalendarService.getActiveCalendars(googleId);
+    res.json({ calendars });
+  }
+
+  static async add(req, res) {
+    const { googleId } = req.userInfo;
+    const { calendarId, summary } = req.body;
+
+    if (!calendarId || !summary) {
+      throw new HttpError(400, "calendarId and summary are required");
+    }
+
+    const result = await CalendarService.addCalendar(googleId, calendarId, summary);
+    res.json(result);
+  }
+
+  static async remove(req, res) {
+    const { googleId } = req.userInfo;
+    const { calendarId, primary } = req.body;
+
+    if (!calendarId) {
+      throw new HttpError(400, "calendarId is required");
+    }
+
+    const result = await CalendarService.deleteCalendar(googleId, calendarId, primary);
+    res.json(result);
+  }
+
+  static async checkExists(req, res) {
+    const { googleId } = req.userInfo;
+    const activeCalendars = await CalendarService.getActiveCalendars(googleId);
+    res.json({ exists: activeCalendars.length > 0 });
+  }
+
+}
 
 module.exports = {
-  getSummaryEvents, getDetailEvents, dataCollector, getSummaryUser, getGoogleCalendars, getCalendars, getActiveCalendars,
-  addCalendar, deleteCalendar, checkCalendarExist, independentUserSummary, getIndependentUserSummary, deleteWorkplace, getPaymentPerWeek
-}
+  // Controllers
+  PaycheckController,
+  CalendarController,  
+  // Services (for backward compatibility or testing)
+  CalendarService,
+  UserService,
+  EventProcessor,
+  PaycheckCalculator
+};
