@@ -22,7 +22,6 @@ if(process.env.MODE == "dev"){
   ]
 }
 
-
 const app = express();
 
 const expressSession = require('express-session');

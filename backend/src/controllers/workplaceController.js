@@ -2,24 +2,24 @@
 
 const { User } = require("../models/User");
 const { Workplace } = require("../models/Workplace");
-const {HttpError} = require("../utils/utils")
+const { HttpError } = require("../utils/utils")
 
 class WorkplaceService {
 
- static async getUserWorkplaces(googleId) {
-  const user = await User.findOne({ googleId });
-  if (!user) {
-    throw new HttpError(404, "User not found");
+  static async getUserWorkplaces(googleId) {
+    const user = await User.findOne({ googleId });
+    if (!user) {
+      throw new HttpError(404, "User not found");
+    }
+
+    const workplaces = await Workplace.find({ userId: user._id });
+
+    return workplaces.map(job => ({
+      workplace: job.workplace,
+      hourlyRate: job.hourlyRate,
+      workplaceId: job._id
+    }));
   }
-  
-  const workplaces = await Workplace.find({ userId: user._id });
-  
-  return workplaces.map(job => ({
-    workplace: job.workplace,
-    hourlyRate: job.hourlyRate,
-    workplaceId: job._id
-  }));
-}
 
   static async deleteWorkplace(googleId, workplaceId) {
     const user = await User.findOne({ googleId });
@@ -39,21 +39,21 @@ class WorkplaceService {
     return { deleted: true };
   }
 
-static async addWorkplace(googleId, workplace, hourlyRate) {
-  const user = await User.findOne({ googleId });
-  if (!user) {
-    throw new HttpError(404, "User not found");
+  static async addWorkplace(googleId, workplace, hourlyRate) {
+    const user = await User.findOne({ googleId });
+    if (!user) {
+      throw new HttpError(404, "User not found");
+    }
+
+    const newWorkplace = new Workplace({
+      userId: user._id,
+      workplace,
+      hourlyRate,
+    });
+
+    await newWorkplace.save();
+    return newWorkplace;
   }
-  
-  const newWorkplace = new Workplace({
-    userId: user._id,
-    workplace,
-    hourlyRate,
-  });
-  
-  await newWorkplace.save();
-  return newWorkplace;
-}
 
 }
 

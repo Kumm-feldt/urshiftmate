@@ -91,7 +91,7 @@ const JobSection = () =>{
                 </div>
                   <div className="dashboard-div-container main-2">
                     <h2 className="h2-title-t">Available Calendars</h2>
-                    <CalendarList calendarList={calendarList}></CalendarList>
+                    <CalendarList calendarList={calendarList.calendars}></CalendarList>
                 </div> 
              
                

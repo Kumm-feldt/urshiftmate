@@ -1,10 +1,9 @@
 const { google } = require("googleapis");
 const { getRefreshToken } = require("./userController");
-const { builtinModules } = require("module");
 const { Workplace } = require("../models/Workplace");
 const { User } = require("../models/User");
 const moment = require("moment-timezone");
-const {HttpError, DateHelper} = require("../utils/utils")
+const { HttpError, DateHelper, DEFAULT_TIMEZONE } = require("../utils/utils");
 
 require('dotenv').config();
 
@@ -13,28 +12,25 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URL
 );
-const DEFAULT_TIMEZONE = "America/Chicago";
-
 
 // ############################ Service Layer ##############################
 class CalendarService {
-
-  // Returns active calendars from DB
+  // Get active calendars for a user from database
   static async getActiveCalendars(googleId) {
     const user = await User.findOne({ googleId }).select("calendars -_id");
     return user?.calendars || [];
   }
 
-  // Returns boolean value if calendar is active
-  static async isCalendarActive(googleId, summary, isPrimary) {
-    const user = await this.getActiveCalendars(googleId);
-
-    return user.calendars.some(cal =>
+  // Check if a specific calendar is active for the user
+   static async isCalendarActive(googleId, summary, isPrimary) {
+    const calendars = await this.getActiveCalendars(googleId);
+    
+    return calendars.some(cal =>
       cal.calendarName === summary || (isPrimary && cal.calendarName === "Primary")
     );
   }
 
-  // Returns a list of objects of the users calendars and its information
+  // Fetch all Google calendars for the user with their active status
   static async getGoogleCalendarList(googleId) {
     const refreshToken = await getRefreshToken(googleId);
     if (!refreshToken) {
@@ -63,7 +59,7 @@ class CalendarService {
     return calendarList;
   }
 
-  // Returns a list of all the events from the active calendars from a certain date range
+  // Fetch events from active calendars within a date range
   static async getEvents(googleId, startDate, endDate, timezone = DEFAULT_TIMEZONE) {
     const refreshToken = await getRefreshToken(googleId);
     if (!refreshToken) {
@@ -98,8 +94,7 @@ class CalendarService {
     return allEvents;
   }
 
-  // Validates if it is first week vs. second week and according to it it will call getEvents 
-  // to get the events of one week (either first or second week)
+  // Get events for a specific week (first or second) based on date object
   static async getWeekEvents(googleId, dates, week, timezone = DEFAULT_TIMEZONE) {
     const isFirstWeek = week === "first";
     const startDate = isFirstWeek ? dates.weekOneStart : dates.weekTwoStart;
@@ -108,7 +103,7 @@ class CalendarService {
     return this.getEvents(googleId, startDate, endDate, timezone);
   }
 
-  // #### ADD CALENDAR ####
+  // Add a calendar to user's active list
   static async addCalendar(googleId, calendarId, calendarName) {
     const result = await User.updateOne(
       { googleId },
@@ -122,7 +117,7 @@ class CalendarService {
     return { added: true };
   }
 
-  // #### DELETE CALENDAR ####
+  // Remove a calendar from user's active list
   static async deleteCalendar(googleId, calendarId, isPrimary) {
     let calendarToDelete = calendarId;
 
@@ -155,21 +150,25 @@ class CalendarService {
 }
 
 class UserService {
+  // Get basic user information
   static async getUserInfo(googleId) {
     const user = await User.findOne({ googleId });
     return user ? { name: user.name, googleId: user.googleId } : null;
   }
-    static async getUserTimezone(googleId) {
-    //const user = await User.findOne({ googleId }).select("timezone -_id");
-    return DEFAULT_TIMEZONE;
+
+  // Get user's preferred timezone, defaults to America/Chicago
+  static async getUserTimezone(googleId) {
+    const user = await User.findOne({ googleId }).select("timezone -_id");
+    return user?.timezone || DEFAULT_TIMEZONE;
   }
 }
 
+
 // ############################ Business Logic ##############################
 class EventProcessor {
-  // From a list of events [from the active calendars] it filters the ones with the keyword shift. 
-  // Then returns a list of events with its information from each shift.
-  // ->>>>>>>>>>>> Wouldnt it be better to filter it before?
+  // Process raw calendar events into shift records with wage calculations
+  // Filters for events containing "shift" keyword and matches with user's workplaces
+   
   static async processShiftEvents(googleId, events, timezone = DEFAULT_TIMEZONE) {
     const user = await User.findOne({ googleId });
     if (!user) {
@@ -220,7 +219,7 @@ class EventProcessor {
     }), { totalWage: 0, totalHours: 0, taxedPaycheck: 0 });
   }
 
-  // returns a list of summaries with information per shift biweekly
+  // Returns a list of summaries with information per shift biweekly
    static summarizeByWorkplace(events) {
     const summary = {};
 

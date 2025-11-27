@@ -2,7 +2,6 @@ const {Phrase} = require("../models/Phrases");        // adjust path if needed
 const jsonPhrases_pos = require("../models/phrases.json"); // array of strings
 const jsonPhrases_neg = require("../models/neg-phrases.json"); // array of strings
 
-
 async function createPhraseBank(type, jsonPhrases) {
   if (!type) throw new Error("Type is required");
   for (const phrase of jsonPhrases) {

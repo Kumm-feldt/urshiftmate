@@ -1,34 +1,47 @@
 const express = require("express");
 const router = express.Router();
-const {WorkplaceController} = require("../controllers/workplaceController");
-const { deleteCalendar, addCalendar, getGoogleCalendars, getCalendars, getActiveCalendars } = require("../controllers/googleController");
+
+const { WorkplaceController } = require("../controllers/workplaceController");
+const { CalendarController } = require("../controllers/googleController");
 const { create } = require("../controllers/oneTimeSetup");
 const { getRandomPhrase } = require("../controllers/generalController");
 const { verifyJWT } = require("../middlewares/jwtMiddleware");
+const { asyncHandler } = require("../middlewares/asyncHandler");
 
-// +++++++++ /worplace +++++++++
+// +++++++++ /workplace +++++++++
 router.use("/workplace", verifyJWT);
-router.post("/workplace", WorkplaceController.addWorkplace);
-router.get("/workplace", WorkplaceController.getWorkplace);
+router.post("/workplace", asyncHandler(WorkplaceController.add));
+router.get("/workplace", asyncHandler(WorkplaceController.get));
 
-// ############################ Workplace Resources ############################
-// DELETE /api/workplaces/:workplaceId
+// DELETE /api/workplace/:workplaceId
 // Returns: { deleted: true }
 router.delete(
-  "/workplaces/:workplaceId", 
+  "/workplace/:workplaceId",
   asyncHandler(WorkplaceController.remove)
 );
 
 // +++++++++ /calendars +++++++++
 router.use("/calendars", verifyJWT);
-router.get("/calendars", getGoogleCalendars, getCalendars)
-router.get("/calendars/active", getActiveCalendars);
-router.put("/calendars/delete", deleteCalendar);
-router.put("/calendars/add", addCalendar);
 
+// GET /api/calendars - Get all Google calendars with active status
+router.get("/calendars", asyncHandler(CalendarController.list));
 
-// not need JWT, one time routes
+// GET /api/calendars/active - Get only active calendars
+router.get("/calendars/active", asyncHandler(CalendarController.listActive));
+
+// POST /api/calendars - Add a calendar
+// Body: { calendarId, summary }
+router.post("/calendars", asyncHandler(CalendarController.add));
+
+// DELETE /api/calendars - Remove a calendar
+// Body: { calendarId, primary }
+router.delete("/calendars", asyncHandler(CalendarController.remove));
+
+// GET /api/calendars/exists - Check if user has active calendars
+router.get("/calendars/exists", asyncHandler(CalendarController.checkExists));
+
+// +++++++++ One-time routes (no JWT) +++++++++
 router.get("/create/setup", create);
-router.get("/randomPhrase", getRandomPhrase)
+router.get("/randomPhrase", getRandomPhrase);
 
 module.exports = router;

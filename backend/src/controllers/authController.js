@@ -5,16 +5,16 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
 let red_uri_frontend;
-if(process.env.MODE == 'dev'){
+if (process.env.MODE == 'dev') {
   red_uri_frontend = process.env.CORS_LINK;
-}else{
+} else {
   red_uri_frontend = process.env.PROD_CORS_LINK;
 }
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URL 
+  process.env.GOOGLE_REDIRECT_URL
 );
 function generateState() {
   return crypto.randomBytes(16).toString('hex');
@@ -55,9 +55,9 @@ exports.googleOAuth2ConsentScreen = async (req, res) => {
 // Handle OAuth2 callback
 exports.oAuth2CallbackHandler = async (req, res) => {
   const { code, error, state } = req.query;
-  const authMode =  'silent';
-  
-  
+  const authMode = 'silent';
+
+
   // If error with silent auth, try with consent
   if (error && authMode === 'silent') {
     const authUrl = oauth2Client.generateAuthUrl({
@@ -67,7 +67,7 @@ exports.oAuth2CallbackHandler = async (req, res) => {
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/calendar.readonly",
       ],
-      prompt: 'select_account', 
+      prompt: 'select_account',
       include_granted_scopes: true,
       redirect_uri: process.env.GOOGLE_REDIRECT_URL
     });
@@ -98,10 +98,10 @@ exports.oAuth2CallbackHandler = async (req, res) => {
       { expiresIn: '14d' }
     );
     // Redirect with token as query parameter
-console.log("TOKE:", jwtToken)
+    console.log("TOKE:", jwtToken)
     res.redirect(`${red_uri_frontend}/auth-success?token=${jwtToken}`);
 
-} catch (error) {
+  } catch (error) {
     console.error("OAuth callback error:", error);
     res.status(500).send("Authentication failed.");
   }
@@ -109,7 +109,7 @@ console.log("TOKE:", jwtToken)
 
 // Logout function
 exports.logout = (req, res) => {
- // res.clearCookie("user");
+  // res.clearCookie("user");
   req.userInfo.destroy((err) => {
     if (err) {
       console.error("Error destroying session:", err);

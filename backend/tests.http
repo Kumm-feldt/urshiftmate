@@ -1,6 +1,7 @@
 @googleRouter = https://urshiftmate.onrender.com/google/api
-@devRouter = http://localhost:8000/google/api
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnb29nbGVJZCI6IjEwMzI4Nzk3MTU4MDA0NjQwODcwNyIsIm5hbWUiOiJBbnRob255IEt1bW1lcmZlbGR0IiwiZW1haWwiOiJha3VtbWVyZmVsZHRAaGFyZGluZy5lZHUiLCJpYXQiOjE3NjIyMTAxMzksImV4cCI6MTc2MzQxOTczOX0.kNM0aA42ARbkut77ZWEltLsyfF7cQJfGSRjzdnQ3T6E
+@devRouter = http://localhost:8000/google
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnb29nbGVJZCI6IjEwMzI4Nzk3MTU4MDA0NjQwODcwNyIsIm5hbWUiOiJBbnRob255IEt1bW1lcmZlbGR0IiwiZW1haWwiOiJha3VtbWVyZmVsZHRAaGFyZGluZy5lZHUiLCJpYXQiOjE3NjQyMDY5MDIsImV4cCI6MTc2NTQxNjUwMn0.fr1ERkg5KKME_uJdNM_HCcZe2TBbqxkGAXMoqTHreeE
+
 
 ###
 # POST request to set workplace configuration
@@ -40,3 +41,10 @@ Authorization: Bearer {{token}}
 GET {{devRouter}}/summaryUser?index=0
 Authorization: Bearer {{token}}
 
+###
+GET {{devRouter}}/paychecks/summary?index=0
+Authorization: Bearer {{token}}
+
+###
+GET {{devRouter}}/calendars
+Authorization: Bearer {{token}}

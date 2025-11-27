@@ -13,7 +13,6 @@ exports.checkUserExists = async (googleId) => {
 
 // Get a user's refresh token
 exports.getRefreshToken = async (googleId) => {
-
   try {
     const user = await User.findOne({ googleId });
 
