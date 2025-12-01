@@ -246,8 +246,8 @@ const Dashboard = ({ showSidebar = true }) => {
             <Summary
               prev={prevWeekPayment}
               date={userInfo.checkDay || '2/2/2026'}
-              moneyAmount={paycheckSummary.paycheck}
-              preTaxMoneyAmount={paycheckSummary.taxedPaycheck}
+              moneyAmount={paycheckSummary.taxedPaycheck}
+              preTaxMoneyAmount={paycheckSummary.paycheck}
             />
 
             <svg
