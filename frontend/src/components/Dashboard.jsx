@@ -57,13 +57,10 @@ const Dashboard = ({ showSidebar = true }) => {
 
   const [detEventsWeekOne, setDetailedEventsWeekOne] = useState([]);
   const [detEventsWeekTwo, setDetailedEventsWeekTwo] = useState([]);
-
   const [summEventsWeekOne, setSummarizedEventsWeekOne] = useState([]);
   const [summEventsWeekTwo, setSummarizedEventsWeekTwo] = useState([]);
-
   const [paycheckSummary, setPaycheckSummary] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
-
   const [phrase, setPhrase] = useState("");
   const [calendarIndex, setCalendarIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -74,6 +71,23 @@ const Dashboard = ({ showSidebar = true }) => {
 
   const contentRef = useRef(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
+
+  const existsCal = async () => {
+    try {
+      const exists = await api.calendarExists();
+      setCalendarExists(exists);
+      return exists;
+    } catch (e) {
+      console.error("Error checking calendar existence:", e);
+      // If user is unauthorized or not found, clear auth and redirect
+      if (e.status === 401 || e.status === 404) {
+        localStorage.removeItem('authToken');
+        window.location.replace("/login");
+        return false;
+      }
+      return false;
+    }
+  };
 
   const fetchData = async (index) => {
     setLoading(true);
@@ -92,20 +106,12 @@ const Dashboard = ({ showSidebar = true }) => {
         api.fetchPaymentPerWeek(calendarIndex - 1)
       ]);
 
-      if (detailedData) {
-        setDetailedEventsWeekOne(detailedData.weekOne || []);
-        setDetailedEventsWeekTwo(detailedData.weekTwo || []);
-      }
-
-      if (summarizedData) {
-        setPaycheckSummary(summarizedData.summary || null);
-        setSummarizedEventsWeekOne(summarizedData.weekOne?.summary || []);
-        setSummarizedEventsWeekTwo(summarizedData.weekTwo?.summary || []);
-      }
-
-      if (userOverview) {
-        setUserInfo(userOverview);
-      }
+      setDetailedEventsWeekOne(detailedData.weekOne || []);
+      setDetailedEventsWeekTwo(detailedData.weekTwo || []);
+      setPaycheckSummary(summarizedData.summary || null);
+      setSummarizedEventsWeekOne(summarizedData.weekOne?.summary || []);
+      setSummarizedEventsWeekTwo(summarizedData.weekTwo?.summary || []);
+      setUserInfo(userOverview || []);
 
       if (prevPaymentData) {
         setPrevWeekPayment(prevPaymentData.summary.taxedPaycheck || 0);
@@ -114,42 +120,13 @@ const Dashboard = ({ showSidebar = true }) => {
       }
 
     } catch (e) {
-      console.error("Error fetching data:", e);
-      // If user is unauthorized or not found, clear auth and redirect to login
-      if (e.status === 401 || e.status === 404) {
-        localStorage.removeItem('authToken');
-        window.location.replace("/login");
-        return;
-      }
       setErrorMsg(mapStatusToMsg(e));
-
-      setDetailedEventsWeekOne([]);
-      setDetailedEventsWeekTwo([]);
-      setSummarizedEventsWeekOne([]);
-      setSummarizedEventsWeekTwo([]);
-      setPaycheckSummary(null);
-      setUserInfo(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const existsCal = async () => {
-    try {
-      const exists = await api.calendarExists();
-      setCalendarExists(exists);
-      return exists;
-    } catch (e) {
-      console.error("Error checking calendar existence:", e);
-      // If user is unauthorized or not found, clear auth and redirect
-      if (e.status === 401 || e.status === 404) {
-        localStorage.removeItem('authToken');
-        window.location.replace("/login");
-        return false;
-      }
-      return false;
-    }
-  };
+
 
   useEffect(() => {
     let alive = true;
@@ -173,13 +150,14 @@ const Dashboard = ({ showSidebar = true }) => {
         setSummarizedEventsWeekTwo([]);
         setPaycheckSummary(null);
         setUserInfo(null);
-        setLoading(false);
       }
+      setLoading(false);
     })();
 
     return () => { alive = false; };
   }, []);
 
+  // Checks the payment summary for personalized message
   useEffect(() => {
     if (!paycheckSummary) return;
 
@@ -208,6 +186,7 @@ const Dashboard = ({ showSidebar = true }) => {
     })();
   }, [calendarIndex]);
 
+
   if (loading)
     return (
       <div className="loading">
@@ -215,6 +194,7 @@ const Dashboard = ({ showSidebar = true }) => {
       </div>
     );
 
+  // Creates personalizad phrase
   let formattedPhrase;
   if (userInfo) {
     formattedPhrase = formatPhrase(phrase, {
@@ -226,170 +206,182 @@ const Dashboard = ({ showSidebar = true }) => {
     });
   }
 
+
   return (
     <div>
       {showSidebar && <Sidebar />}
 
-      <div className="dashboard-div-container">
-        <h1 className="h1-title-table">{formattedPhrase}</h1>
-
-        <div className="summary-container">
-          <svg
-            onClick={() => setCalendarIndex(calendarIndex - 1)}
-            className="w-[44px] h-[44px] text-gray-800 arrow-i"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="3"
-              d="M5 12h14M5 12l4-4m-4 4 4 4"
-            />
-          </svg>
-
-          <Summary
-            prev={prevWeekPayment}
-            date={userInfo.checkDay || '2/2/2026'}
-            moneyAmount={paycheckSummary.paycheck}
-            preTaxMoneyAmount={paycheckSummary.taxedPaycheck}
-          />
-
-          <svg
-            onClick={() => setCalendarIndex(calendarIndex + 1)}
-            className="w-[44px] h-[44px] text-gray-800 arrow-i"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="3"
-              d="M19 12H5m14 0-4 4m4-4-4-4"
-            />
-          </svg>
+      {!calendarExists ? (
+        // Show this when no calendar exists
+        <div className="dashboard-div-container">
+          <div className="div-message-container">
+            <div className="no-calendar-message">
+              <h2>No Calendar Found</h2>
+              <p>Please set up your calendars in Settings to get started.</p>
+            </div>
+          </div>
         </div>
+      ) : (
+        <div className="dashboard-div-container">
+          <h1 className="h1-title-table">{formattedPhrase}</h1>
 
-        <div className="buttons-dashboard">
-          <button
-            onClick={() => setCalendarIndex(0)}
-            className="current-btn"
-          >
-            Current
-          </button>
+          <div className="summary-container">
+            <svg
+              onClick={() => setCalendarIndex(calendarIndex - 1)}
+              className="w-[44px] h-[44px] text-gray-800 arrow-i"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="3"
+                d="M5 12h14M5 12l4-4m-4 4 4 4"
+              />
+            </svg>
 
-          <div>
-            <button className="current-btn" onClick={reactToPrintFn}>
-              <i className="bi bi-printer-fill"></i>
+            <Summary
+              prev={prevWeekPayment}
+              date={userInfo.checkDay || '2/2/2026'}
+              moneyAmount={paycheckSummary.paycheck}
+              preTaxMoneyAmount={paycheckSummary.taxedPaycheck}
+            />
+
+            <svg
+              onClick={() => setCalendarIndex(calendarIndex + 1)}
+              className="w-[44px] h-[44px] text-gray-800 arrow-i"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="3"
+                d="M19 12H5m14 0-4 4m4-4-4-4"
+              />
+            </svg>
+          </div>
+
+          <div className="buttons-dashboard">
+            <button
+              onClick={() => setCalendarIndex(0)}
+              className="current-btn"
+            >
+              Current
             </button>
-          </div>
-        </div>
 
-        <div className="dashboard-middle">
-          <div className="dashboard-toggle-bar">
-            <div
-              id="table-details-btn"
-              className="dashboard-toggle d-t-details"
-              onClick={toggleBar}
-            >
-              Details
+            <div>
+              <button className="current-btn" onClick={reactToPrintFn}>
+                <i className="bi bi-printer-fill"></i>
+              </button>
+            </div>
+          </div>
+
+          <div className="dashboard-middle">
+            <div className="dashboard-toggle-bar">
+              <div
+                id="table-details-btn"
+                className="dashboard-toggle d-t-details"
+                onClick={toggleBar}
+              >
+                Details
+              </div>
+
+              <div
+                id="table-summary-btn"
+                className="dashboard-toggle d-t-summary toggle-active"
+                onClick={toggleBar}
+              >
+                Summary
+              </div>
+            </div>
+
+            <div id="table-summary" className="table-holder">
+              <h2 className="h2-title-table">
+                Hours from {userInfo?.weekOne?.start} to {userInfo?.weekOne?.end}
+              </h2>
+              <Table
+                columns={HEADER}
+                data={summEventsWeekOne}
+                renderType="Summary"
+              />
+
+              <h2 className="h2-title-table">
+                Hours from {userInfo?.weekTwo?.start} to {userInfo?.weekTwo?.end}
+              </h2>
+              <Table
+                columns={HEADER}
+                data={summEventsWeekTwo}
+                renderType="Summary"
+              />
             </div>
 
             <div
-              id="table-summary-btn"
-              className="dashboard-toggle d-t-summary toggle-active"
-              onClick={toggleBar}
+              ref={contentRef}
+              id="table-details"
+              className="print-area table-holder table-inactive"
             >
-              Summary
+              <div className="print-header">
+                <p className="title-header">
+                  Summary of Hours - UrShiftmate.com
+                </p>
+
+                <table className="header-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Date Range</th>
+                      <th>Expected Amount</th>
+                      <th>Paydate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{userInfo.username}</td>
+                      <td>
+                        {userInfo?.weekOne?.start} - {userInfo?.weekTwo?.end}
+                      </td>
+                      <td>${paycheckSummary.taxedPaycheck}</td>
+                      <td>{userInfo.checkDay}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p>
+                  *The paycheck amounts shown are estimates based on the user’s
+                  input and personal calendar data. <br />
+                  This tool is intended for personal reference only and does not
+                  reflect official payroll records or guarantees of actual
+                  compensation.
+                </p>
+              </div>
+
+              <h2 className="h2-title-table">
+                Hours from {userInfo?.weekOne?.start} to {userInfo?.weekOne?.end}
+              </h2>
+              <Table
+                columns={HEADERDETAILED}
+                data={detEventsWeekOne}
+                renderType="Detailed"
+              />
+
+              <h2 className="h2-title-table">
+                Hours from {userInfo?.weekTwo?.start} to {userInfo?.weekTwo?.end}
+              </h2>
+              <Table
+                columns={HEADERDETAILED}
+                data={detEventsWeekTwo}
+                renderType="Detailed"
+              />
             </div>
           </div>
-
-          <div id="table-summary" className="table-holder">
-            <h2 className="h2-title-table">
-              Hours from {userInfo?.weekOne?.start} to {userInfo?.weekOne?.end}
-            </h2>
-            <Table
-              columns={HEADER}
-              data={summEventsWeekOne}
-              renderType="Summary"
-            />
-
-            <h2 className="h2-title-table">
-              Hours from {userInfo?.weekTwo?.start} to {userInfo?.weekTwo?.end}
-            </h2>
-            <Table
-              columns={HEADER}
-              data={summEventsWeekTwo}
-              renderType="Summary"
-            />
-          </div>
-
-          <div
-            ref={contentRef}
-            id="table-details"
-            className="print-area table-holder table-inactive"
-          >
-            <div className="print-header">
-              <p className="title-header">
-                Summary of Hours - UrShiftmate.com
-              </p>
-
-              <table className="header-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Date Range</th>
-                    <th>Expected Amount</th>
-                    <th>Paydate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{userInfo.username}</td>
-                    <td>
-                      {userInfo?.weekOne?.start} - {userInfo?.weekTwo?.end}
-                    </td>
-                    <td>${paycheckSummary.taxedPaycheck}</td>
-                    <td>{userInfo.checkDay}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <p>
-                *The paycheck amounts shown are estimates based on the user’s
-                input and personal calendar data. <br />
-                This tool is intended for personal reference only and does not
-                reflect official payroll records or guarantees of actual
-                compensation.
-              </p>
-            </div>
-
-            <h2 className="h2-title-table">
-              Hours from {userInfo?.weekOne?.start} to {userInfo?.weekOne?.end}
-            </h2>
-            <Table
-              columns={HEADERDETAILED}
-              data={detEventsWeekOne}
-              renderType="Detailed"
-            />
-
-            <h2 className="h2-title-table">
-              Hours from {userInfo?.weekTwo?.start} to {userInfo?.weekTwo?.end}
-            </h2>
-            <Table
-              columns={HEADERDETAILED}
-              data={detEventsWeekTwo}
-              renderType="Detailed"
-            />
-          </div>
-        </div>
-      </div>
+        </div>)}
     </div>
   );
 };

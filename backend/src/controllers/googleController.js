@@ -24,9 +24,8 @@ class CalendarService {
   // Check if a specific calendar is active for the user
    static async isCalendarActive(googleId, summary, isPrimary) {
     const calendars = await this.getActiveCalendars(googleId);
-    
     return calendars.some(cal =>
-      cal.calendarName === summary || (isPrimary && cal.calendarName === "Primary")
+      cal.calendarName.trim() == summary.trim() || (isPrimary && cal.calendarName === "Primary")
     );
   }
 
@@ -44,10 +43,9 @@ class CalendarService {
     if (!response.data.items || response.data.items.length === 0) {
       return [];
     }
-
     const calendarList = [];
     for (const cal of response.data.items) {
-      const isActive = await this.isCalendarActive(googleId, cal.summary, cal.primary);
+      const isActive = await this.isCalendarActive(googleId, cal.summary, cal.primary); // ->>>>>>>.. Checking
       calendarList.push({
         calendarId: cal.id,
         calendarSummary: cal.summary,

@@ -1,6 +1,9 @@
 @googleRouter = https://urshiftmate.onrender.com/google/api
 @devRouter = http://localhost:8000/google
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnb29nbGVJZCI6IjEwMzI4Nzk3MTU4MDA0NjQwODcwNyIsIm5hbWUiOiJBbnRob255IEt1bW1lcmZlbGR0IiwiZW1haWwiOiJha3VtbWVyZmVsZHRAaGFyZGluZy5lZHUiLCJpYXQiOjE3NjQyMDY5MDIsImV4cCI6MTc2NTQxNjUwMn0.fr1ERkg5KKME_uJdNM_HCcZe2TBbqxkGAXMoqTHreeE
+
+@crudApi = http://localhost:8000/user/config
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnb29nbGVJZCI6IjEwMzI4Nzk3MTU4MDA0NjQwODcwNyIsIm5hbWUiOiJBbnRob255IEt1bW1lcmZlbGR0IiwiZW1haWwiOiJha3VtbWVyZmVsZHRAaGFyZGluZy5lZHUiLCJpYXQiOjE3NjQ2MTczMzYsImV4cCI6MTc2NTgyNjkzNn0.CuW8HM2Fo6A1sXwBzt6QMHmTO05HK1iqCNiDql-3bwo
+
 
 
 ###
@@ -46,5 +49,5 @@ GET {{devRouter}}/paychecks/summary?index=0
 Authorization: Bearer {{token}}
 
 ###
-GET {{devRouter}}/calendars
+GET {{crudApi}}/calendars
 Authorization: Bearer {{token}}

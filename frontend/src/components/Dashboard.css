@@ -36,10 +36,11 @@
     padding: 6px 10px;
 }
 
-.buttons-dashboard{
+.buttons-dashboard {
     display: flex;
 }
-.buttons-dashboard button{
+
+.buttons-dashboard button {
     margin-left: 5px;
     margin-right: 5px;
 
@@ -199,5 +200,45 @@
     .py-4 {
         padding-top: 1rem !important;
         padding-bottom: 1rem !important;
+    }
+}
+
+/* Error message not calendars */
+.div-message-container{
+    padding-top: 20vh;
+}
+.no-calendar-message {
+    background: #ffffff;
+    padding: 40px 50px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.4s ease-in-out;
+    max-width: 380px;
+}
+
+.no-calendar-message h2 {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    color: #222;
+    font-weight: 600;
+}
+
+.no-calendar-message p {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* Smooth fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
